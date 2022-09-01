@@ -1,5 +1,5 @@
-use liu_bbs::cli;
+use liu_bbs::cli::App;
 
 fn main() {
-    cli::run_main_app();
+    App::run();
 }
