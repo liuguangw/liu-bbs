@@ -7,10 +7,13 @@ use rocket::Config;
 /// 运行 `HTTP` 服务的命令
 #[derive(Args)]
 pub struct ServerCommand {
+    ///IP address
     #[clap(short = 'H', long, value_parser)]
     host: Option<String>,
+    ///listen port
     #[clap(short = 'P', long, value_parser)]
     port: Option<u16>,
+    ///Path of configuration file
     #[clap(short='C', long="conf", value_parser, default_value_t=String::from("./config.toml"), value_name = "FILE")]
     config_file_path: String,
 }
