@@ -1,7 +1,7 @@
 use super::DatabaseConfig;
-use mongodb::bson::doc;
+use mongodb::bson::{doc, Document};
 use mongodb::options::ClientOptions;
-use mongodb::{Client, Database};
+use mongodb::{Client, Collection, Database};
 
 ///数据库连接对象
 pub struct DatabaseData {
@@ -22,33 +22,52 @@ impl DatabaseData {
         let client = Client::with_options(client_options)?;
         let database = client.database(&database_config.database_name);
         //ping
-        database
-            .run_command(
-                doc! {
-                    "ping":1,
-                },
-                client.selection_criteria().cloned(),
-            )
-            .await?;
+        Self::run_command(
+            &database,
+            doc! {
+                "ping":1,
+            },
+        )
+        .await?;
         Ok(Self {
             database,
             client,
             collection_prefix: database_config.collection_prefix.to_string(),
         })
     }
+
+    ///执行数据库命令
+    async fn run_command(
+        database: &Database,
+        command: Document,
+    ) -> Result<Document, mongodb::error::Error> {
+        database
+            .run_command(command, database.selection_criteria().cloned())
+            .await
+    }
+
     ///获取数据库服务器版本
     pub async fn db_version(&self) -> Result<String, mongodb::error::Error> {
-        let result = self
-            .database
-            .run_command(
-                doc! {
-                   "buildInfo": 1,
-                },
-                self.client.selection_criteria().cloned(),
-            )
-            .await?;
-        dbg!(&result);
+        let result = Self::run_command(
+            &self.database,
+            doc! {
+               "buildInfo": 1,
+            },
+        )
+        .await?;
+        //dbg!(&result);
         let version = result.get_str("version").expect("get version failed");
         Ok(version.to_string())
+    }
+
+    ///获取集合的完整名称
+    pub fn collection_full_name(&self, short_name: &str) -> String {
+        format!("{}{}", &self.collection_prefix, short_name)
+    }
+
+    ///获取集合对象
+    pub fn collection<T>(&self, short_name: &str) -> Collection<T> {
+        let full_name = self.collection_full_name(short_name);
+        self.database.collection(&full_name)
     }
 }
