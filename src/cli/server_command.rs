@@ -1,6 +1,5 @@
 use super::app_command::AppCommand;
-use crate::common::{AppConfig, DatabaseData, LaunchError};
-use crate::routes;
+use crate::common::{AppConfig, DatabaseData, LaunchError, RocketExt};
 use clap::Args;
 use rocket::figment::Figment;
 use rocket::Config;
@@ -40,13 +39,12 @@ impl ServerCommand {
         let app_config = AppConfig::load(&self.config_file_path).await?;
         let figment = self.load_figment(&app_config);
         let database_data = DatabaseData::connect(&app_config.database).await?;
-        let _rocket = {
-            let r = rocket::custom(figment).manage(database_data);
-            let r = routes::load_common_routes(r);
-            routes::load_api_routes(r)
-        }
-        .launch()
-        .await?;
+        let _rocket = rocket::custom(figment)
+            .manage(database_data)
+            .add_routes()
+            .add_services()
+            .launch()
+            .await?;
         Ok(())
     }
 }

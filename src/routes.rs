@@ -2,5 +2,10 @@
 mod api;
 mod common;
 
-pub use api::load_api_routes;
-pub use common::load_common_routes;
+use rocket::{Build, Rocket};
+
+///加载路由
+pub fn load(b: Rocket<Build>) -> Rocket<Build> {
+    let r = common::load_routes(b);
+    api::load_routes(r)
+}
