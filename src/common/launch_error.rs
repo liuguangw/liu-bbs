@@ -8,6 +8,8 @@ pub enum LaunchError {
     ConfigError(AppConfigError),
     ///服务启动错误
     RocketError(Box<rocket::Error>),
+    ///数据库错误
+    DatabaseError(mongodb::error::Error),
 }
 impl From<rocket::Error> for LaunchError {
     fn from(e: rocket::Error) -> Self {
@@ -19,12 +21,18 @@ impl From<AppConfigError> for LaunchError {
         Self::ConfigError(e)
     }
 }
+impl From<mongodb::error::Error> for LaunchError {
+    fn from(e: mongodb::error::Error) -> Self {
+        Self::DatabaseError(e)
+    }
+}
 
 impl Display for LaunchError {
     fn fmt(&self, f: &mut Formatter) -> fmt::Result {
         match &self {
             Self::RocketError(e) => <rocket::Error as Display>::fmt(e, f),
             Self::ConfigError(e) => <AppConfigError as Display>::fmt(e, f),
+            Self::DatabaseError(e) => <mongodb::error::Error as Display>::fmt(e, f),
         }
     }
 }
