@@ -19,8 +19,11 @@ impl AppConfig {
     pub async fn load(file_path: &str) -> Result<Self, AppConfigError> {
         let contents = fs::read_to_string(file_path)
             .await
-            .map_err(|err| (file_path, err))?;
-        let s: Self = toml::from_str(&contents).map_err(|err| (file_path, err))?;
+            //std::io::Error -> AppConfigError
+            .map_err(|err| AppConfigError::IoErr(file_path.to_string(), err))?;
+        let s: Self = toml::from_str(&contents)
+            //toml::de::Error -> AppConfigError
+            .map_err(|err| AppConfigError::ParseErr(file_path.to_string(), err))?;
         Ok(s)
     }
 }
