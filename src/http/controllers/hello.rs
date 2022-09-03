@@ -1,9 +1,10 @@
-use crate::common::{DatabaseData, ResponseResult};
+use crate::common::ResponseResult;
+use crate::services::DemoService;
 use rocket::State;
 
 /// 输出hello world
 #[rocket::get("/hello")]
-pub async fn hello(database_data: &State<DatabaseData>) -> ResponseResult<String> {
-    let version = database_data.db_version().await?;
-    Ok(format!("Hello, world, database version: {}", version).into())
+pub async fn hello(demo_service: &State<DemoService>) -> ResponseResult<String> {
+    let str = demo_service.hello().await?;
+    Ok(str.into())
 }
