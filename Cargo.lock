@@ -858,6 +858,7 @@ dependencies = [
  "mongodb",
  "rocket",
  "serde",
+ "thiserror",
  "tokio",
  "toml",
 ]

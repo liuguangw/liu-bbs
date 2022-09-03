@@ -41,8 +41,8 @@ impl ServerCommand {
         let database_data = DatabaseData::connect(&app_config.database).await?;
         let _rocket = rocket::custom(figment)
             .manage(database_data)
-            .add_routes()
-            .add_services()
+            .attach_routes()
+            .attach_services()
             .launch()
             .await?;
         Ok(())
