@@ -1,0 +1,3 @@
+//! 数据迁移
+mod m2022_08_19_000000_create_counters_collection;
+pub use m2022_08_19_000000_create_counters_collection::CreateCountersCollection;

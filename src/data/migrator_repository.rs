@@ -1,0 +1,45 @@
+use crate::common::{DatabaseData, Migration, MigrationLog};
+use crate::migrations::CreateCountersCollection;
+use mongodb::bson::doc;
+use mongodb::options::FindOptions;
+use mongodb::Collection;
+use rocket::futures::TryStreamExt;
+use std::sync::Arc;
+
+///migrator repository
+pub struct MigratorRepository {
+    database_data: Arc<DatabaseData>,
+}
+
+impl MigratorRepository {
+    pub fn new(database_data: &Arc<DatabaseData>) -> Self {
+        Self {
+            database_data: database_data.clone(),
+        }
+    }
+    fn migration_log_collection(&self) -> Collection<MigrationLog> {
+        self.database_data.collection("migrations")
+    }
+    ///demo
+    pub async fn insert_log(&self, migration_log: &MigrationLog) -> mongodb::error::Result<()> {
+        let coll = self.migration_log_collection();
+        coll.insert_one(migration_log, None).await?;
+        Ok(())
+    }
+
+    pub async fn get_migration_logs(
+        &self,
+        sort_type: i32,
+    ) -> mongodb::error::Result<Vec<MigrationLog>> {
+        let coll = self.migration_log_collection();
+        let find_options = FindOptions::builder()
+            .sort(doc! { "_id": sort_type })
+            .build();
+        let cursor = coll.find(None, find_options).await?;
+        let items = cursor.try_collect().await?;
+        Ok(items)
+    }
+    pub fn all_migrations(&self) -> Vec<Box<dyn Migration>> {
+        vec![Box::new(CreateCountersCollection::new(&self.database_data))]
+    }
+}
