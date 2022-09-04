@@ -10,11 +10,16 @@ defaults:
   run:
     shell: bash
 
+env:
+  CARGO_TERM_COLOR: always
+  RUST_BACKTRACE: 1
+  TZ: Asia/Shanghai
+
 permissions:
   contents: read
 
 jobs:
-  rustfmt:
+  build-check:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3

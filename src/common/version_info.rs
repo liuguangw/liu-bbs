@@ -60,7 +60,7 @@ pub fn get_version_string(is_verbose: bool) -> String {
         }
         write!(version_string, "\nbuild-time: {}", version_info.build_time).unwrap();
         if option_env!("GITHUB_REPOSITORY").is_some() {
-            write!(version_string, "\nbuild-method: GitHub").unwrap();
+            write!(version_string, "\nbuild-method: GitHub Action").unwrap();
         } else {
             write!(version_string, "\nbuild-method: common").unwrap();
         }
