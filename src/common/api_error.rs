@@ -25,7 +25,7 @@ impl ApiError {
     ///记录错误信息
     fn log_error(&self, req: &Request<'_>) {
         //只记录某些错误
-        if let Self::DatabaseError(err) = &self {
+        if let Self::DatabaseError(err) = self {
             println!(
                 "[Error#{}] {:?}, method={}, uri={}",
                 self.code(),

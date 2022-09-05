@@ -39,4 +39,18 @@ fn build_info() {
         "cargo:rustc-env=LIU_BBS_COMPILER_HOST_OS={}",
         os_info::get()
     );
+    println!(
+        "cargo:rustc-env=LIU_BBS_HOST_TARGET={}",
+        std::env::var("TARGET").unwrap()
+    );
+    //cargo version
+    let output = match Command::new("cargo").arg("-V").output() {
+        Ok(output) if output.status.success() => output,
+        _ => return,
+    };
+    let stdout = String::from_utf8(output.stdout).unwrap();
+    let mut parts = stdout.split_whitespace();
+    let mut next = || parts.next().unwrap();
+    next();
+    println!("cargo:rustc-env=LIU_BBS_CARGO_VERSION={}", next());
 }

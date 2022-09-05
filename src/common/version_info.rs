@@ -20,6 +20,8 @@ pub struct VersionInfo {
     pub compiler_host_os: String,
     ///git提交信息
     pub commit_info: Option<CommitInfo>,
+    ///cargo版本
+    pub cargo_version: Option<String>,
 }
 impl fmt::Display for VersionInfo {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
@@ -40,11 +42,13 @@ impl Default for VersionInfo {
                 commit_hash: env!("LIU_BBS_COMMIT_HASH").to_string(),
                 commit_date: env!("LIU_BBS_COMMIT_DATE").to_string(),
             });
+        let cargo_version = option_env!("LIU_BBS_CARGO_VERSION").map(|s| s.to_string());
         VersionInfo {
             version: env!("CARGO_PKG_VERSION").to_string(),
             build_time: env!("LIU_BBS_BUILD_TIME").to_string(),
             compiler_host_os: env!("LIU_BBS_COMPILER_HOST_OS").to_string(),
             commit_info,
+            cargo_version,
         }
     }
 }
@@ -59,19 +63,23 @@ pub fn get_version_string(is_verbose: bool) -> String {
             write!(version_string, "\ncommit-date: {}", commit_info.commit_date).unwrap();
         }
         write!(version_string, "\nbuild-time: {}", version_info.build_time).unwrap();
+        //for GitHub Action
         if option_env!("GITHUB_REPOSITORY").is_some() {
             write!(version_string, "\nbuild-method: GitHub Action").unwrap();
-        } else {
-            write!(version_string, "\nbuild-method: common").unwrap();
         }
+        //cargo version
+        if let Some(v) = version_info.cargo_version {
+            write!(version_string, "\ncargo-version: {}", v).unwrap();
+        }
+        write!(version_string, "\nhost: {}", env!("LIU_BBS_HOST_TARGET")).unwrap();
         write!(
             version_string,
-            "\ncompiler-host-os: {}",
+            "\ncompiler-os: {}",
             version_info.compiler_host_os
         )
         .unwrap();
         //当前运行的环境
-        write!(version_string, "\ncurrent-host-os:  {}", os_info::get()).unwrap();
+        write!(version_string, "\nos: {}", os_info::get()).unwrap();
     }
     version_string
 }

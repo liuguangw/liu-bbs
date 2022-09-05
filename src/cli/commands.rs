@@ -1,7 +1,7 @@
 use super::app_command::AppCommand;
 use super::hello_command::HelloCommand;
+use super::migrate_command::MigrateCommand;
 use super::server_command::ServerCommand;
-use crate::cli::migrate_command::MigrateCommand;
 use clap::Subcommand;
 
 #[derive(Subcommand)]
