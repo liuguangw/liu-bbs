@@ -6,6 +6,7 @@ pub struct DemoRepository {
 }
 
 impl DemoRepository {
+    ///构造函数
     pub fn new(database_data: &Arc<DatabaseData>) -> Self {
         Self {
             database_data: database_data.clone(),

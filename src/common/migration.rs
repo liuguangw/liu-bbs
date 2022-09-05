@@ -3,7 +3,7 @@ use async_trait::async_trait;
 
 ///数据迁移trait定义
 #[async_trait]
-pub trait Migration {
+pub trait Migration: Send + Sync {
     ///迁移的唯一名称
     fn name(&self) -> &str;
     ///执行迁移, 函数签名如下

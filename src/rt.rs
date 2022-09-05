@@ -1,5 +1,3 @@
-//! 异步运行时, 用于其他非web服务的场景
-
 use std::future::Future;
 use tokio::runtime::Runtime;
 

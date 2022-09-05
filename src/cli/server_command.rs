@@ -1,8 +1,11 @@
 use super::app_command::AppCommand;
-use crate::common::{AppConfig, DatabaseData, LaunchError, RocketExt};
+use crate::common::{AppConfig, DatabaseData, LaunchError, MigrationError, RocketExt};
+use crate::data::MigratorRepository;
+use crate::services::MigratorService;
 use clap::Args;
 use rocket::figment::Figment;
 use rocket::Config;
+use std::sync::Arc;
 
 /// 运行 `HTTP` 服务的命令
 #[derive(Args)]
@@ -34,11 +37,22 @@ impl ServerCommand {
         }
         config_figment
     }
+    async fn do_migrate(&self, database_data: &Arc<DatabaseData>) -> Result<(), MigrationError> {
+        let migrator_repo = MigratorRepository::new(database_data);
+        let migrator_service = MigratorService::new(migrator_repo);
+        let migrate_count = migrator_service.run_migrate(None).await?;
+        if migrate_count > 0 {
+            println!("Migrate count: {}", migrate_count);
+        }
+        Ok(())
+    }
     /// 启动rocket
     async fn launch(&self) -> Result<(), LaunchError> {
         let app_config = AppConfig::load(&self.config_file_path).await?;
         let figment = self.load_figment(&app_config);
         let database_data = DatabaseData::connect(&app_config.database).await?;
+        let database_data = Arc::new(database_data);
+        self.do_migrate(&database_data).await?;
         let _rocket = rocket::custom(figment)
             .attach_routes()
             .attach_services(database_data)

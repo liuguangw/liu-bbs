@@ -1,4 +1,3 @@
-//! 控制器
 mod error_demo;
 mod hello;
 

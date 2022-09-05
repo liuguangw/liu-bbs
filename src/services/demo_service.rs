@@ -6,6 +6,7 @@ pub struct DemoService {
 }
 
 impl DemoService {
+    ///构造函数
     pub fn new(demo_repo: &Arc<DemoRepository>) -> Self {
         Self {
             demo_repo: demo_repo.clone(),

@@ -1,5 +1,7 @@
 use super::AppConfigError;
+use crate::common::MigrationError;
 use thiserror::Error;
+
 /// 服务启动错误
 #[derive(Debug, Error)]
 pub enum LaunchError {
@@ -12,6 +14,9 @@ pub enum LaunchError {
     ///数据库错误
     #[error("{0:?}")]
     DatabaseError(#[from] mongodb::error::Error),
+    ///数据迁移错误
+    #[error("{0}")]
+    MigrationError(#[from] MigrationError),
 }
 
 impl From<rocket::Error> for LaunchError {

@@ -15,8 +15,9 @@ pub enum ApiError {
 }
 
 impl ApiError {
+    ///错误代码
     pub fn code(&self) -> u32 {
-        match &self {
+        match self {
             Self::Common(_) => 5000,
             Self::DatabaseError(_) => 5001,
         }

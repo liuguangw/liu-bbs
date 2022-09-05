@@ -1,7 +1,7 @@
-//! 公用模块
 mod api_error;
 mod app_config;
 mod app_config_error;
+mod collection_name;
 mod database_config;
 mod database_data;
 mod launch_error;
@@ -10,11 +10,14 @@ mod migration_error;
 mod migration_log;
 mod response_result;
 mod rocket_ext;
+///序列化相关
+pub mod serde_helpers;
 mod server_config;
 mod version_info;
 pub use api_error::ApiError;
 pub use app_config::AppConfig;
 pub use app_config_error::AppConfigError;
+pub use collection_name::CollectionName;
 pub use database_config::DatabaseConfig;
 pub use database_data::DatabaseData;
 pub use launch_error::LaunchError;

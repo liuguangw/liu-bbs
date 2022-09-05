@@ -1,6 +1,7 @@
 use super::app_command::AppCommand;
 use super::hello_command::HelloCommand;
 use super::server_command::ServerCommand;
+use crate::cli::migrate_command::MigrateCommand;
 use clap::Subcommand;
 
 #[derive(Subcommand)]
@@ -9,13 +10,16 @@ pub enum Commands {
     Hello(HelloCommand),
     #[clap(name = "serve", about = "run api server")]
     Serve(ServerCommand),
+    #[clap(name = "migrate", about = "data migration")]
+    Migrate(MigrateCommand),
 }
 
 impl AppCommand for Commands {
     fn execute(&self) {
-        match &self {
+        match self {
             Commands::Hello(s) => s.execute(),
             Commands::Serve(s) => s.execute(),
+            Commands::Migrate(s) => s.execute(),
         }
     }
 }
