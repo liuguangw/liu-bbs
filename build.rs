@@ -5,6 +5,13 @@ fn main() {
     commit_info();
     build_info();
 }
+
+///设置编译环境变量
+macro_rules! set_builder_env {
+    ($($arg:tt)*) => {
+        println!("cargo:rustc-env={}={}", $($arg)*);
+    };
+}
 fn commit_info() {
     if !Path::new(".git").exists() {
         return;
@@ -24,19 +31,14 @@ fn commit_info() {
     let stdout = String::from_utf8(output.stdout).unwrap();
     let mut parts = stdout.split_whitespace();
     let mut next = || parts.next().unwrap();
-    println!("cargo:rustc-env=LIU_BBS_COMMIT_HASH={}", next());
-    println!("cargo:rustc-env=LIU_BBS_COMMIT_SHORT_HASH={}", next());
-    println!("cargo:rustc-env=LIU_BBS_COMMIT_DATE={}", next())
+    set_builder_env!("LIU_BBS_COMMIT_HASH", next());
+    set_builder_env!("LIU_BBS_COMMIT_SHORT_HASH", next());
+    set_builder_env!("LIU_BBS_COMMIT_DATE", next());
 }
 fn build_info() {
-    println!(
-        "cargo:rustc-env=LIU_BBS_COMPILER_HOST_OS={}",
-        os_info::get()
-    );
-    println!(
-        "cargo:rustc-env=LIU_BBS_HOST_TARGET={}",
-        std::env::var("TARGET").unwrap()
-    );
+    set_builder_env!("LIU_BBS_COMPILER_HOST_OS", os_info::get());
+    set_builder_env!("LIU_BBS_HOST_TARGET", std::env::var("TARGET").unwrap());
+    set_builder_env!("LIU_BBS_BUILD_PROFILE", std::env::var("PROFILE").unwrap());
     //cargo version
     let output = match Command::new("cargo").arg("-V").output() {
         Ok(output) if output.status.success() => output,
@@ -46,5 +48,5 @@ fn build_info() {
     let mut parts = stdout.split_whitespace();
     let mut next = || parts.next().unwrap();
     next();
-    println!("cargo:rustc-env=LIU_BBS_CARGO_VERSION={}", next());
+    set_builder_env!("LIU_BBS_CARGO_VERSION", next());
 }

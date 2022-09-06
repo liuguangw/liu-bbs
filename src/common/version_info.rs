@@ -54,14 +54,20 @@ pub fn get_version_string(is_verbose: bool) -> String {
     let version_info = VersionInfo::default();
     let mut version_string = format!("{} {}", env!("CARGO_PKG_NAME"), version_info);
     if is_verbose {
-        write!(version_string, "\nrelease: {}", version_info.version).unwrap();
+        write!(version_string, "\nversion: {}", version_info.version).unwrap();
+        write!(
+            version_string,
+            "\nbuild-type: {}",
+            env!("LIU_BBS_BUILD_PROFILE")
+        )
+        .unwrap();
+        //for GitHub Action
+        if option_env!("GITHUB_REPOSITORY").is_some() {
+            write!(version_string, "\nbuild-from: GitHub Action").unwrap();
+        }
         if let Some(ref commit_info) = version_info.commit_info {
             write!(version_string, "\ncommit-hash: {}", commit_info.commit_hash).unwrap();
             write!(version_string, "\ncommit-date: {}", commit_info.commit_date).unwrap();
-        }
-        //for GitHub Action
-        if option_env!("GITHUB_REPOSITORY").is_some() {
-            write!(version_string, "\nbuild-method: GitHub Action").unwrap();
         }
         //cargo version
         if let Some(v) = version_info.cargo_version {
