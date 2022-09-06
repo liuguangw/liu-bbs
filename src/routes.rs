@@ -1,10 +1,10 @@
 mod api;
 mod common;
+use actix_web::web;
 
-use rocket::{Build, Rocket};
-
-///加载路由
-pub fn load(b: Rocket<Build>) -> Rocket<Build> {
-    let r = common::load_routes(b);
-    api::load_routes(r)
+///配置路由
+pub fn configure_routes(cfg: &mut web::ServiceConfig) {
+    common::load_routes(cfg);
+    let scope = web::scope("/api");
+    api::load_routes(scope, cfg);
 }

@@ -1,7 +1,5 @@
-use rocket::response::Responder;
-use rocket::serde::json::Json;
-use rocket::serde::ser::{Serialize, SerializeStruct, Serializer};
-use rocket::{response, Request};
+use actix_web::{body::BoxBody, http::StatusCode, HttpResponse, ResponseError};
+use serde::{ser::SerializeStruct, Serialize, Serializer};
 use thiserror::Error;
 ///api错误
 #[derive(Debug, Error)]
@@ -23,16 +21,10 @@ impl ApiError {
         }
     }
     ///记录错误信息
-    fn log_error(&self, req: &Request<'_>) {
+    fn log_error(&self) {
         //只记录某些错误
         if let Self::DatabaseError(err) = self {
-            println!(
-                "[Error#{}] {:?}, method={}, uri={}",
-                self.code(),
-                err,
-                req.method().as_str(),
-                req.uri(),
-            )
+            println!("[Error#{}] {:?}", self.code(), err,)
         }
     }
 }
@@ -50,9 +42,15 @@ impl Serialize for ApiError {
     }
 }
 
-impl<'r> Responder<'r, 'static> for ApiError {
-    fn respond_to(self, req: &'r Request<'_>) -> response::Result<'static> {
-        self.log_error(req);
-        Json(&self).respond_to(req)
+impl ResponseError for ApiError {
+    fn status_code(&self) -> StatusCode {
+        StatusCode::OK
+    }
+    fn error_response(&self) -> HttpResponse<BoxBody> {
+        self.log_error();
+        let body = serde_json::to_string(self).expect("json serialize failed");
+        HttpResponse::build(self.status_code())
+            .content_type("application/json")
+            .body(body)
     }
 }

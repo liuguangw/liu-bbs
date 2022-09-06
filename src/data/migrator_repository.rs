@@ -2,10 +2,10 @@ use crate::common::{CollectionName, DatabaseData, Migration, MigrationLog};
 use crate::migrations::{
     CreateCountersCollection, CreateUserEmailsCollection, CreateUsersCollection,
 };
+use futures::stream::TryStreamExt;
 use mongodb::bson::doc;
 use mongodb::options::FindOptions;
 use mongodb::Collection;
-use rocket::futures::TryStreamExt;
 use std::sync::Arc;
 
 ///migrator repository

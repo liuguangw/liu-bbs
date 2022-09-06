@@ -10,7 +10,6 @@ mod migration;
 mod migration_error;
 mod migration_log;
 mod response_result;
-mod rocket_ext;
 ///序列化相关
 pub mod serde_helpers;
 mod server_config;
@@ -28,7 +27,6 @@ pub use migration_error::MigrationError;
 pub use migration_log::MigrationLog;
 pub use response_result::ResponseData;
 pub use response_result::ResponseResult;
-pub use rocket_ext::RocketExt;
 pub use server_config::ServerConfig;
 pub use version_info::get_version_string;
 pub use version_info::CommitInfo;

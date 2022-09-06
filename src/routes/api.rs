@@ -1,10 +1,10 @@
 use crate::http::controllers;
-use rocket::{routes, Build, Rocket};
+use actix_web::{web::ServiceConfig, Scope};
 
 /// 加载api路由
-pub fn load_routes(b: Rocket<Build>) -> Rocket<Build> {
-    b.mount(
-        "/api",
-        routes![controllers::hello_world, controllers::error_demo_fn],
-    )
+pub fn load_routes(scope: Scope, cfg: &mut ServiceConfig) {
+    let scope = scope
+        .service(controllers::hello_world)
+        .service(controllers::error_demo_fn);
+    cfg.service(scope);
 }

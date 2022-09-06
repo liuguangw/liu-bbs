@@ -1,10 +1,10 @@
 use super::app_command::AppCommand;
-use crate::common::{AppConfig, DatabaseData, LaunchError, MigrationError, RocketExt};
-use crate::data::MigratorRepository;
-use crate::services::MigratorService;
+use crate::common::{AppConfig, DatabaseData, LaunchError, MigrationError};
+use crate::data::{DemoRepository, MigratorRepository};
+use crate::routes;
+use crate::services::{DemoService, MigratorService};
+use actix_web::{rt, web, App, HttpServer};
 use clap::Args;
-use rocket::figment::Figment;
-use rocket::Config;
 use std::sync::Arc;
 
 /// 运行 `HTTP` 服务的命令
@@ -22,21 +22,6 @@ pub struct ServerCommand {
 }
 
 impl ServerCommand {
-    ///加载rocket配置
-    fn load_figment(&self, app_config: &AppConfig) -> Figment {
-        //merge 配置项
-        let mut config_figment = Config::figment()
-            .merge(("address", &app_config.server.host))
-            .merge(("port", &app_config.server.port));
-        //cli传参可以覆盖配置文件中的定义
-        if let Some(ref address) = self.host {
-            config_figment = config_figment.merge(("address", address))
-        }
-        if let Some(port) = self.port {
-            config_figment = config_figment.merge(("port", port))
-        }
-        config_figment
-    }
     async fn do_migrate(&self, database_data: &Arc<DatabaseData>) -> Result<(), MigrationError> {
         let migrator_repo = MigratorRepository::new(database_data);
         let migrator_service = MigratorService::new(migrator_repo);
@@ -46,18 +31,24 @@ impl ServerCommand {
         }
         Ok(())
     }
-    /// 启动rocket
+    /// 启动web服务
     async fn launch(&self) -> Result<(), LaunchError> {
+        //加载配置
         let app_config = AppConfig::load(&self.config_file_path).await?;
-        let figment = self.load_figment(&app_config);
+        //连接数据库
         let database_data = DatabaseData::connect(&app_config.database).await?;
         let database_data = Arc::new(database_data);
+        //执行数据迁移
         self.do_migrate(&database_data).await?;
-        let _rocket = rocket::custom(figment)
-            .attach_routes()
-            .attach_services(database_data)
-            .launch()
-            .await?;
+        //run web server
+        HttpServer::new(move || {
+            App::new()
+                .configure(routes::configure_routes)
+                .configure(|cfg| configure_data(cfg, &database_data))
+        })
+        .bind((app_config.server.host.as_str(), app_config.server.port))?
+        .run()
+        .await?;
         Ok(())
     }
 }
@@ -66,8 +57,15 @@ impl AppCommand for ServerCommand {
     /// 运行 http 服务
     fn execute(&self) {
         //println!("host={} port={}", &self.host, self.port);
-        if let Err(err) = rocket::execute(self.launch()) {
+        if let Err(err) = rt::System::new().block_on(self.launch()) {
             panic!("{}", err)
         }
     }
+}
+
+///配置共享数据
+fn configure_data(cfg: &mut web::ServiceConfig, database_data: &Arc<DatabaseData>) {
+    let demo_repo = Arc::new(DemoRepository::new(database_data));
+    let demo_service = DemoService::new(&demo_repo);
+    cfg.app_data(web::Data::new(demo_service));
 }
