@@ -1,4 +1,3 @@
-use chrono::offset::Local;
 use std::path::Path;
 use std::process::Command;
 
@@ -30,11 +29,6 @@ fn commit_info() {
     println!("cargo:rustc-env=LIU_BBS_COMMIT_DATE={}", next())
 }
 fn build_info() {
-    let now = Local::now();
-    println!(
-        "cargo:rustc-env=LIU_BBS_BUILD_TIME={}",
-        now.format("%F %T (GMT%:z)")
-    );
     println!(
         "cargo:rustc-env=LIU_BBS_COMPILER_HOST_OS={}",
         os_info::get()

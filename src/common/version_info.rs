@@ -14,8 +14,6 @@ pub struct CommitInfo {
 pub struct VersionInfo {
     ///版本号
     pub version: String,
-    ///编译时间
-    pub build_time: String,
     ///编译环境的系统信息
     pub compiler_host_os: String,
     ///git提交信息
@@ -45,7 +43,6 @@ impl Default for VersionInfo {
         let cargo_version = option_env!("LIU_BBS_CARGO_VERSION").map(|s| s.to_string());
         VersionInfo {
             version: env!("CARGO_PKG_VERSION").to_string(),
-            build_time: env!("LIU_BBS_BUILD_TIME").to_string(),
             compiler_host_os: env!("LIU_BBS_COMPILER_HOST_OS").to_string(),
             commit_info,
             cargo_version,
@@ -62,7 +59,6 @@ pub fn get_version_string(is_verbose: bool) -> String {
             write!(version_string, "\ncommit-hash: {}", commit_info.commit_hash).unwrap();
             write!(version_string, "\ncommit-date: {}", commit_info.commit_date).unwrap();
         }
-        write!(version_string, "\nbuild-time: {}", version_info.build_time).unwrap();
         //for GitHub Action
         if option_env!("GITHUB_REPOSITORY").is_some() {
             write!(version_string, "\nbuild-method: GitHub Action").unwrap();
