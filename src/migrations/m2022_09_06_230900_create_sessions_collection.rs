@@ -5,14 +5,15 @@ use mongodb::bson::document::Document;
 use mongodb::options::IndexOptions;
 use mongodb::{Collection, IndexModel};
 use std::sync::Arc;
+use std::time::Duration;
 
-///创建用户邮箱绑定记录集合
+///创建会话集合
 ///
-/// name: `2022_09_06_000000_create_user_emails_collection`
-pub struct CreateUserEmailsCollection {
+/// name: `2022_09_06_230900_create_sessions_collection`
+pub struct CreateSessionsCollection {
     database_data: Arc<DatabaseData>,
 }
-impl CreateUserEmailsCollection {
+impl CreateSessionsCollection {
     ///构造函数
     pub fn new(database_data: &Arc<DatabaseData>) -> Self {
         Self {
@@ -21,14 +22,14 @@ impl CreateUserEmailsCollection {
     }
     ///获取集合对象
     fn collection(&self) -> Collection<Document> {
-        self.database_data.collection(&CollectionName::UserEmails)
+        self.database_data.collection(&CollectionName::Sessions)
     }
 }
 
 #[async_trait]
-impl Migration for CreateUserEmailsCollection {
+impl Migration for CreateSessionsCollection {
     fn name(&self) -> &str {
-        "2022_09_06_000000_create_user_emails_collection"
+        "2022_09_06_230900_create_sessions_collection"
     }
 
     async fn up(&self) -> Result<(), MigrationError> {
@@ -37,22 +38,22 @@ impl Migration for CreateUserEmailsCollection {
         let index_models = vec![
             IndexModel::builder()
                 .keys(doc! {
-                    "email": 1,
-                })
-                .options(
-                    IndexOptions::builder()
-                        .name("email_uni".to_string())
-                        .unique(true)
-                        .build(),
-                )
-                .build(),
-            IndexModel::builder()
-                .keys(doc! {
                     "user_id": 1,
                 })
                 .options(
                     IndexOptions::builder()
                         .name("user_id_index".to_string())
+                        .build(),
+                )
+                .build(),
+            IndexModel::builder()
+                .keys(doc! {
+                    "expired_at": 1,
+                })
+                .options(
+                    IndexOptions::builder()
+                        .name("expired_at_ttl".to_string())
+                        .expire_after(Duration::from_secs(1))
                         .build(),
                 )
                 .build(),

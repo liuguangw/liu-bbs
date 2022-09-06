@@ -10,6 +10,8 @@ pub enum CollectionName {
     Users,
     ///用户邮箱绑定记录集合
     UserEmails,
+    ///用户会话集合
+    Sessions,
 }
 impl CollectionName {
     ///字符串形式
@@ -19,6 +21,7 @@ impl CollectionName {
             Self::Counters => "counters",
             Self::Users => "users",
             Self::UserEmails => "user_emails",
+            Self::Sessions => "sessions",
         }
     }
 }
