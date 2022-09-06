@@ -10,10 +10,7 @@ pub enum LaunchError {
     ConfigError(#[from] AppConfigError),
     ///服务启动错误
     #[error("{0}")]
-    ServerError(#[from] actix_web::Error),
-    ///服务启动错误
-    #[error("{0}")]
-    BindError(#[from] std::io::Error),
+    ServerError(#[from] std::io::Error),
     ///数据库错误
     #[error("{0:?}")]
     DatabaseError(#[from] mongodb::error::Error),
