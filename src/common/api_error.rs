@@ -48,9 +48,6 @@ impl ResponseError for ApiError {
     }
     fn error_response(&self) -> HttpResponse<BoxBody> {
         self.log_error();
-        let body = serde_json::to_string(self).expect("json serialize failed");
-        HttpResponse::build(self.status_code())
-            .content_type("application/json")
-            .body(body)
+        HttpResponse::build(self.status_code()).json(self)
     }
 }

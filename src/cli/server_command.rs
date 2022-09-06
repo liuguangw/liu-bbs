@@ -40,7 +40,11 @@ impl ServerCommand {
         let database_data = Arc::new(database_data);
         //执行数据迁移
         self.do_migrate(&database_data).await?;
-        //run web server
+        //run api server
+        println!(
+            "api server run at http://{}:{}",
+            app_config.server.host, app_config.server.port
+        );
         HttpServer::new(move || {
             App::new()
                 .configure(routes::configure_routes)

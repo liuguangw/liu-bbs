@@ -817,7 +817,6 @@ dependencies = [
  "mongodb",
  "os_info",
  "serde",
- "serde_json",
  "thiserror",
  "tokio",
  "toml",
