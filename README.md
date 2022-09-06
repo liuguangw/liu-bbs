@@ -1,5 +1,5 @@
 # liu-bbs
-a simple rust project, This app is still in the early stages of development.
+a simple rust project, this app is still in the early stages of development.
 
 ### build for debug
 

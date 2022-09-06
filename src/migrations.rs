@@ -1,2 +1,6 @@
 mod m2022_08_19_000000_create_counters_collection;
+mod m2022_09_06_000000_create_users_collection;
+mod m2022_09_06_135500_create_user_emails_collection;
 pub use m2022_08_19_000000_create_counters_collection::CreateCountersCollection;
+pub use m2022_09_06_000000_create_users_collection::CreateUsersCollection;
+pub use m2022_09_06_135500_create_user_emails_collection::CreateUserEmailsCollection;

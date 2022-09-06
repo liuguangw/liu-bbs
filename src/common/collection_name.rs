@@ -6,6 +6,10 @@ pub enum CollectionName {
     Migrations,
     ///计数器集合
     Counters,
+    ///用户集合
+    Users,
+    ///用户邮箱绑定记录集合
+    UserEmails,
 }
 impl CollectionName {
     ///字符串形式
@@ -13,6 +17,8 @@ impl CollectionName {
         match self {
             Self::Migrations => "migrations",
             Self::Counters => "counters",
+            Self::Users => "users",
+            Self::UserEmails => "user_emails",
         }
     }
 }
@@ -20,7 +26,7 @@ impl CollectionName {
 impl Deref for CollectionName {
     type Target = str;
     ///获取集合名称
-    fn deref(&self) -> &str {
+    fn deref(&self) -> &Self::Target {
         self.as_str()
     }
 }

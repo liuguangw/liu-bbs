@@ -1,5 +1,7 @@
 use crate::common::{CollectionName, DatabaseData, Migration, MigrationLog};
-use crate::migrations::CreateCountersCollection;
+use crate::migrations::{
+    CreateCountersCollection, CreateUserEmailsCollection, CreateUsersCollection,
+};
 use mongodb::bson::doc;
 use mongodb::options::FindOptions;
 use mongodb::Collection;
@@ -56,6 +58,10 @@ impl MigratorRepository {
     }
     ///构造迁移对象列表
     pub fn all_migrations(&self) -> Vec<Box<dyn Migration>> {
-        vec![Box::new(CreateCountersCollection::new(&self.database_data))]
+        vec![
+            Box::new(CreateCountersCollection::new(&self.database_data)),
+            Box::new(CreateUsersCollection::new(&self.database_data)),
+            Box::new(CreateUserEmailsCollection::new(&self.database_data)),
+        ]
     }
 }
