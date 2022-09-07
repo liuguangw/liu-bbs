@@ -11,6 +11,8 @@ pub mod data;
 pub mod http;
 ///数据迁移
 pub mod migrations;
+///模型定义
+pub mod models;
 ///路由
 pub mod routes;
 ///异步运行时

@@ -816,10 +816,13 @@ dependencies = [
  "futures",
  "mongodb",
  "os_info",
+ "rand",
  "serde",
+ "sha1",
  "thiserror",
  "tokio",
  "toml",
+ "uuid 1.1.2",
 ]
 
 [[package]]
@@ -1772,6 +1775,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "dd6469f4314d5f1ffec476e05f17cc9a78bc7a27a6a857842170bdf8d6f98d2f"
 dependencies = [
  "getrandom",
+ "rand",
  "serde",
 ]
 
