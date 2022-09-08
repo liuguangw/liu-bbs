@@ -17,8 +17,10 @@ pub struct Session {
     ///session数据
     pub data: HashMap<String, String>,
     ///创建时间
+    #[serde(with = "crate::common::serde_helpers::bson_system_time")]
     pub created_at: SystemTime,
     ///过期时间
+    #[serde(with = "crate::common::serde_helpers::bson_system_time")]
     pub expired_at: SystemTime,
 }
 
@@ -30,12 +32,10 @@ impl Default for Session {
 }
 impl Session {
     fn build_new_session(user_id: i64, duration_secs: u64) -> Self {
-        let id = Uuid::new_v4().simple();
-        let id = id.encode_lower(&mut Uuid::encode_buffer()).to_string();
         let created_at = SystemTime::now();
         let expired_at = created_at.add(Duration::from_secs(duration_secs));
         Self {
-            id,
+            id: Default::default(),
             user_id,
             data: Default::default(),
             created_at,
@@ -48,5 +48,11 @@ impl Session {
             return Self::default();
         }
         Self::build_new_session(user_id, 30 * 24 * 3600)
+    }
+    ///设置随机id
+    pub fn set_random_id(&mut self) {
+        let id = Uuid::new_v4().simple();
+        let id = id.encode_lower(&mut Uuid::encode_buffer()).to_string();
+        self.id = id;
     }
 }

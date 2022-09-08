@@ -10,5 +10,6 @@ pub struct UserEmail {
     ///email地址
     pub email: String,
     ///绑定时间
+    #[serde(with = "crate::common::serde_helpers::bson_system_time")]
     pub created_at: SystemTime,
 }

@@ -1,12 +1,16 @@
-use crate::{common::ResponseResult, http::responses::InitSessionResponse, models::Session};
-use actix_web::post;
+use crate::{
+    common::ResponseResult, http::responses::InitSessionResponse, services::SessionService,
+};
+use actix_web::{post, web};
 use std::time::SystemTime;
 
 ///初始化用户会话
 #[post("/session/init")]
-pub async fn init_session() -> ResponseResult<InitSessionResponse> {
+pub async fn init_session(
+    session_service: web::Data<SessionService>,
+) -> ResponseResult<InitSessionResponse> {
     //demo data
-    let session = Session::default();
+    let session = session_service.create_new_session(0).await?;
     let expires_in = session
         .expired_at
         .duration_since(SystemTime::now())
