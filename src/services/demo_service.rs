@@ -1,4 +1,4 @@
-use crate::data::DemoRepository;
+use crate::{common::DatabaseResult, data::DemoRepository};
 use std::sync::Arc;
 /// demo service
 pub struct DemoService {
@@ -13,7 +13,7 @@ impl DemoService {
         }
     }
     ///hello demo
-    pub async fn hello(&self) -> mongodb::error::Result<String> {
+    pub async fn hello(&self) -> DatabaseResult<String> {
         let coll_names = self.demo_repo.list_collection_names().await?;
         let db_version = self.demo_repo.db_version().await?;
         Ok(format!(

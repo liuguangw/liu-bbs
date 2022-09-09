@@ -10,7 +10,7 @@ pub async fn init_session(
     session_service: web::Data<SessionService>,
 ) -> ResponseResult<InitSessionResponse> {
     //demo data
-    let session = session_service.create_new_session(0).await?;
+    let session = session_service.create_new_session(None).await?;
     let expires_in = session
         .expired_at
         .duration_since(SystemTime::now())

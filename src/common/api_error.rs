@@ -1,3 +1,4 @@
+use super::DatabaseError;
 use actix_web::{body::BoxBody, http::StatusCode, HttpResponse, ResponseError};
 use serde::{ser::SerializeStruct, Serialize, Serializer};
 use thiserror::Error;
@@ -9,7 +10,7 @@ pub enum ApiError {
     Common(String),
     ///数据库错误(错误详细信息不会给用户)
     #[error("database error")]
-    DatabaseError(#[from] mongodb::error::Error),
+    DatabaseError(#[from] DatabaseError),
 }
 
 impl ApiError {
@@ -24,7 +25,7 @@ impl ApiError {
     fn log_error(&self) {
         //只记录某些错误
         if let Self::DatabaseError(err) = self {
-            println!("[Error#{}] {:?}", self.code(), err,)
+            println!("[Error#{}] {}", self.code(), err,)
         }
     }
 }

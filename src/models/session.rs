@@ -24,12 +24,6 @@ pub struct Session {
     pub expired_at: SystemTime,
 }
 
-impl Default for Session {
-    fn default() -> Self {
-        //30分钟有效期
-        Self::build_new_session(0, 30 * 60)
-    }
-}
 impl Session {
     fn build_new_session(user_id: i64, duration_secs: u64) -> Self {
         let created_at = SystemTime::now();
@@ -43,11 +37,12 @@ impl Session {
         }
     }
     ///为用户创建一个新的session对象
-    pub fn new(user_id: i64) -> Self {
-        if user_id <= 0 {
-            return Self::default();
-        }
-        Self::build_new_session(user_id, 30 * 24 * 3600)
+    pub fn new(user_id: Option<i64>) -> Self {
+        let (user_id, duration_secs) = match user_id {
+            Some(value) => (value, 30 * 24 * 3600),
+            None => (0, 30 * 60),
+        };
+        Self::build_new_session(user_id, duration_secs)
     }
     ///设置随机id
     pub fn set_random_id(&mut self) {

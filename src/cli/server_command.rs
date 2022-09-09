@@ -2,7 +2,7 @@ use super::app_command::AppCommand;
 use crate::common::{AppConfig, DatabaseData, LaunchError, MigrationError};
 use crate::data::{DemoRepository, MigratorRepository, SessionRepository};
 use crate::routes;
-use crate::services::{DemoService, MigratorService, SessionService};
+use crate::services::{CaptchaService, DemoService, MigratorService, SessionService};
 use actix_web::{rt, web, App, HttpServer};
 use clap::Args;
 use std::sync::Arc;
@@ -73,6 +73,8 @@ fn configure_data(cfg: &mut web::ServiceConfig, database_data: &Arc<DatabaseData
     let demo_service = DemoService::new(&demo_repo);
     let session_repo = SessionRepository::new(database_data);
     let session_service = SessionService::new(session_repo);
+    let captcha_service = CaptchaService::default();
     cfg.app_data(web::Data::new(demo_service))
-        .app_data(web::Data::new(session_service));
+        .app_data(web::Data::new(session_service))
+        .app_data(web::Data::new(captcha_service));
 }

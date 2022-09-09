@@ -1,7 +1,7 @@
 use crate::{
-    common::{ApiError, ResponseResult},
-    http::requests::SessionRequest,
-    services::SessionService,
+    common::ApiError,
+    http::{requests::SessionRequest, responses::CaptchaResponse},
+    services::{CaptchaService, SessionService},
 };
 use actix_web::{get, web};
 
@@ -9,13 +9,20 @@ use actix_web::{get, web};
 #[get("/captcha/show")]
 pub async fn show(
     session_service: web::Data<SessionService>,
+    captcha_service: web::Data<CaptchaService>,
     query: web::Query<SessionRequest>,
-) -> ResponseResult<String> {
+) -> Result<CaptchaResponse, ApiError> {
     let session = session_service.load_session(&query.id).await?;
     if session.is_none() {
         return Err(ApiError::Common("invalid session id".to_string()));
     }
-    let session = session.unwrap();
-    //todo show captcha
-    Ok(session.id.into())
+    let mut session = session.unwrap();
+    //todo deal error
+    let captcha = captcha_service.build().unwrap();
+    session
+        .data
+        .insert("code".to_string(), captcha.phrase.to_string());
+    session_service.save_session(&mut session).await?;
+    //show captcha
+    Ok(CaptchaResponse::new(captcha.data()))
 }
