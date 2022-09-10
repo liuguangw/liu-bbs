@@ -1,5 +1,5 @@
 use crate::{
-    common::{ApiError, ResponseResult},
+    common::{ApiError, ApiRequest, ResponseResult},
     http::{requests::RegisterRequest, responses::LoginResponse},
     models::User,
     services::{SessionService, UserService},
@@ -13,9 +13,8 @@ pub async fn register(
     session_service: web::Data<SessionService>,
     user_service: web::Data<UserService>,
     conn: ConnectionInfo,
-    req: web::Json<RegisterRequest>,
+    req: ApiRequest<RegisterRequest>,
 ) -> ResponseResult<LoginResponse> {
-    req.check_input()?;
     let mut session = match session_service.load_session(&req.session_id).await? {
         Some(v) => v,
         None => return Err(ApiError::InvalidSessionID),

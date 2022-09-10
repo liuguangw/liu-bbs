@@ -1,7 +1,7 @@
 use regex::Regex;
 use serde::Deserialize;
 
-use crate::common::ApiError;
+use crate::common::{ApiError, ApiRequestValidator};
 
 ///用户注册请求
 #[derive(Deserialize, Default)]
@@ -20,9 +20,9 @@ pub struct RegisterRequest {
     pub password: String,
 }
 
-impl RegisterRequest {
+impl ApiRequestValidator for RegisterRequest {
     ///检测用户输入
-    pub fn check_input(&self) -> Result<(), ApiError> {
+    fn check_input(&self) -> Result<(), ApiError> {
         if self.session_id.is_empty() {
             return Err(ApiError::new_bad_request("会话id不能为空"));
         }

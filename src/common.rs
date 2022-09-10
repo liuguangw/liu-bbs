@@ -1,4 +1,5 @@
 mod api_error;
+mod api_request;
 mod app_config;
 mod app_config_error;
 mod collection_name;
@@ -16,6 +17,8 @@ pub mod serde_helpers;
 mod server_config;
 mod version_info;
 pub use api_error::ApiError;
+pub use api_request::ApiRequest;
+pub use api_request::ApiRequestValidator;
 pub use app_config::AppConfig;
 pub use app_config_error::AppConfigError;
 pub use collection_name::CollectionName;
