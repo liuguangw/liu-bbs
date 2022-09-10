@@ -19,6 +19,7 @@ impl UserService {
             counter_repo: counter_repo.clone(),
         }
     }
+
     ///处理用户注册
     pub async fn process_register(&self, user: &mut User) -> Result<(), ApiError> {
         //判断用户名是否已经存在
@@ -54,5 +55,28 @@ impl UserService {
             .await
             .map_err(DatabaseError::from)?;
         Ok(())
+    }
+
+    ///处理用户登录
+    pub async fn process_login(&self, username: &str, password: &str) -> Result<User, ApiError> {
+        //判断用户名是否已经存在
+        let user = match self
+            .user_repo
+            .find_by_username(username)
+            .await
+            .map_err(DatabaseError::from)?
+        {
+            Some(v) => v,
+            None => {
+                let message = format!("用户名 {} 不存在", username);
+                return Err(ApiError::Common(message));
+            }
+        };
+        //判断密码是否正确
+        if !user.check_password(password) {
+            Err(ApiError::Common("密码错误".to_string()))
+        } else {
+            Ok(user)
+        }
     }
 }

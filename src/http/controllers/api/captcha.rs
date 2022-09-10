@@ -4,6 +4,7 @@ use crate::{
     services::{CaptchaService, SessionService},
 };
 use actix_web::{get, http::header, web, CustomizeResponder, Responder};
+use tokio::task;
 
 ///显示验证码图片
 #[get("/captcha/show")]
@@ -16,7 +17,12 @@ pub async fn show(
         Some(v) => v,
         None => return Err(ApiError::InvalidSessionID),
     };
-    let captcha = captcha_service.build()?;
+    let captcha_task = task::spawn_blocking(move || {
+        // This is running on a blocking thread.
+        // Blocking here is ok.
+        captcha_service.build()
+    });
+    let captcha = captcha_task.await.unwrap()?;
     session
         .data
         .insert("code".to_string(), captcha.phrase.to_string());
