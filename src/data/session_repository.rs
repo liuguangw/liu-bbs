@@ -21,25 +21,17 @@ impl SessionRepository {
         }
     }
     fn collection(&self) -> Collection<Session> {
-        self.database_data.collection(&CollectionName::Sessions)
+        self.database_data.collection(CollectionName::Sessions)
     }
 
-    ///保存会话到数据库
-    pub async fn save_session(&self, session: &mut Session) -> mongodb::error::Result<()> {
-        if session.id.is_empty() {
-            self.insert_session(session).await
-        } else {
-            self.update_session(session).await
-        }
-    }
-
-    async fn insert_session(&self, session: &mut Session) -> mongodb::error::Result<()> {
-        session.set_random_id();
+    ///插入会话记录到数据库
+    pub async fn insert_session(&self, session: &Session) -> mongodb::error::Result<()> {
         let coll = self.collection();
         coll.insert_one(session, None).await?;
         Ok(())
     }
 
+    ///用于序列化data字段
     fn serialize_data(data: &HashMap<String, String>) -> Document {
         let mut document = Document::new();
         for (k, v) in data {
@@ -48,7 +40,8 @@ impl SessionRepository {
         document
     }
 
-    async fn update_session(&self, session: &Session) -> mongodb::error::Result<()> {
+    ///更新会话
+    pub async fn update_session(&self, session: &Session) -> mongodb::error::Result<()> {
         let update_data = doc! {
             "$set":doc! {
             "user_id":session.user_id,

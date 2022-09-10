@@ -23,7 +23,7 @@ impl MigratorRepository {
     }
     ///获取迁移记录集合对象
     fn migration_log_collection(&self) -> Collection<MigrationLog> {
-        self.database_data.collection(&CollectionName::Migrations)
+        self.database_data.collection(CollectionName::Migrations)
     }
     ///插入一条迁移记录
     pub async fn insert_log(&self, migration_log: &MigrationLog) -> mongodb::error::Result<()> {

@@ -1,5 +1,3 @@
-use std::ops::Deref;
-
 ///集合名称
 pub enum CollectionName {
     ///迁移记录集合
@@ -13,6 +11,7 @@ pub enum CollectionName {
     ///用户会话集合
     Sessions,
 }
+
 impl CollectionName {
     ///字符串形式
     pub fn as_str(&self) -> &'static str {
@@ -23,13 +22,5 @@ impl CollectionName {
             Self::UserEmails => "user_emails",
             Self::Sessions => "sessions",
         }
-    }
-}
-
-impl Deref for CollectionName {
-    type Target = str;
-    ///获取集合名称
-    fn deref(&self) -> &Self::Target {
-        self.as_str()
     }
 }

@@ -1,8 +1,10 @@
 use super::app_command::AppCommand;
 use crate::common::{AppConfig, DatabaseData, LaunchError, MigrationError};
-use crate::data::{DemoRepository, MigratorRepository, SessionRepository};
+use crate::data::{
+    CounterRepository, DemoRepository, MigratorRepository, SessionRepository, UserRepository,
+};
 use crate::routes;
-use crate::services::{CaptchaService, DemoService, MigratorService, SessionService};
+use crate::services::{CaptchaService, DemoService, MigratorService, SessionService, UserService};
 use actix_web::{rt, web, App, HttpServer};
 use clap::Args;
 use std::sync::Arc;
@@ -69,12 +71,19 @@ impl AppCommand for ServerCommand {
 
 ///配置共享数据
 fn configure_data(cfg: &mut web::ServiceConfig, database_data: &Arc<DatabaseData>) {
-    let demo_repo = Arc::new(DemoRepository::new(database_data));
-    let demo_service = DemoService::new(&demo_repo);
+    let demo_repo = DemoRepository::new(database_data);
+    let demo_service = DemoService::new(demo_repo);
+    //
     let session_repo = SessionRepository::new(database_data);
     let session_service = SessionService::new(session_repo);
+    //
     let captcha_service = CaptchaService::default();
+    //
+    let counter_repo = Arc::new(CounterRepository::new(database_data));
+    let user_repo = UserRepository::new(database_data);
+    let user_service = UserService::new(user_repo, &counter_repo);
     cfg.app_data(web::Data::new(demo_service))
         .app_data(web::Data::new(session_service))
-        .app_data(web::Data::new(captcha_service));
+        .app_data(web::Data::new(captcha_service))
+        .app_data(web::Data::new(user_service));
 }

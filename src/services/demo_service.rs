@@ -1,16 +1,13 @@
 use crate::{common::DatabaseResult, data::DemoRepository};
-use std::sync::Arc;
 /// demo service
 pub struct DemoService {
-    demo_repo: Arc<DemoRepository>,
+    demo_repo: DemoRepository,
 }
 
 impl DemoService {
     ///构造函数
-    pub fn new(demo_repo: &Arc<DemoRepository>) -> Self {
-        Self {
-            demo_repo: demo_repo.clone(),
-        }
+    pub fn new(demo_repo: DemoRepository) -> Self {
+        Self { demo_repo }
     }
     ///hello demo
     pub async fn hello(&self) -> DatabaseResult<String> {

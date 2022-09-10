@@ -1,4 +1,5 @@
 use crate::{common::DatabaseResult, data::SessionRepository, models::Session};
+use uuid::Uuid;
 ///会话服务
 pub struct SessionService {
     session_repo: SessionRepository,
@@ -9,12 +10,6 @@ impl SessionService {
     pub fn new(session_repo: SessionRepository) -> Self {
         Self { session_repo }
     }
-    ///创建新会话
-    pub async fn create_new_session(&self, user_id: Option<i64>) -> DatabaseResult<Session> {
-        let mut session = Session::new(user_id);
-        self.session_repo.save_session(&mut session).await?;
-        Ok(session)
-    }
 
     ///加载会话数据
     pub async fn load_session(&self, session_id: &str) -> DatabaseResult<Option<Session>> {
@@ -23,9 +18,24 @@ impl SessionService {
             .await
             .map_err(|e| e.into())
     }
-    ///保存会话到数据库
-    pub async fn save_session(&self, session: &mut Session) -> DatabaseResult<()> {
-        self.session_repo.save_session(session).await?;
+
+    ///生成随机id
+    fn generate_random_id() -> String {
+        let id = Uuid::new_v4().simple();
+        id.encode_lower(&mut Uuid::encode_buffer()).to_string()
+    }
+
+    ///创建新会话,并保存到数据库
+    pub async fn create_new_session(&self, user_id: Option<i64>) -> DatabaseResult<Session> {
+        let mut session = Session::new(user_id);
+        session.id = Self::generate_random_id();
+        self.session_repo.insert_session(&session).await?;
+        Ok(session)
+    }
+
+    ///更新会话数据
+    pub async fn update_session(&self, session: &Session) -> DatabaseResult<()> {
+        self.session_repo.update_session(session).await?;
         Ok(())
     }
 }

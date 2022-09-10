@@ -1,7 +1,7 @@
-use serde::{Deserialize, Serialize};
+use serde::Serialize;
 
 ///初始化session的响应
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize)]
 pub struct InitSessionResponse {
     ///会话唯一标识
     pub id: String,

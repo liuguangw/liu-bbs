@@ -1,4 +1,4 @@
-use super::DatabaseConfig;
+use super::{CollectionName, DatabaseConfig};
 use mongodb::bson::{doc, Document};
 use mongodb::options::ClientOptions;
 use mongodb::{Client, Collection, Database};
@@ -61,12 +61,12 @@ impl DatabaseData {
     }
 
     ///获取集合的完整名称
-    pub fn collection_full_name(&self, short_name: &str) -> String {
-        format!("{}{}", &self.collection_prefix, short_name)
+    pub fn collection_full_name(&self, short_name: CollectionName) -> String {
+        format!("{}{}", &self.collection_prefix, short_name.as_str())
     }
 
     ///获取集合对象
-    pub fn collection<T>(&self, short_name: &str) -> Collection<T> {
+    pub fn collection<T>(&self, short_name: CollectionName) -> Collection<T> {
         let full_name = self.collection_full_name(short_name);
         self.database.collection(&full_name)
     }

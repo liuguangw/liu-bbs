@@ -20,7 +20,11 @@ impl CreateCountersCollection {
     ///获取计数器集合完整名称
     fn collection_full_name(&self) -> String {
         self.database_data
-            .collection_full_name(&CollectionName::Counters)
+            .collection_full_name(CollectionName::Counters)
+    }
+    ///获取集合对象
+    fn collection(&self) -> Collection<Document> {
+        self.database_data.collection(CollectionName::Counters)
     }
 }
 
@@ -40,8 +44,7 @@ impl Migration for CreateCountersCollection {
     }
 
     async fn down(&self) -> Result<(), MigrationError> {
-        let coll_name = self.collection_full_name();
-        let coll: Collection<Document> = self.database_data.database.collection(&coll_name);
+        let coll = self.collection();
         coll.drop(None).await?;
         Ok(())
     }

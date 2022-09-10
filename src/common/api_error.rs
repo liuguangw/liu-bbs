@@ -1,5 +1,6 @@
 use super::DatabaseError;
 use actix_web::{body::BoxBody, http::StatusCode, HttpResponse, ResponseError};
+use captcha_a::ImageError;
 use serde::{ser::SerializeStruct, Serialize, Serializer};
 use thiserror::Error;
 ///api错误
@@ -11,14 +12,30 @@ pub enum ApiError {
     ///数据库错误(错误详细信息不会给用户)
     #[error("database error")]
     DatabaseError(#[from] DatabaseError),
+    ///无效的会话id
+    #[error("invalid session id")]
+    InvalidSessionID,
+    ///请求参数错误
+    #[error("{0}")]
+    BadRequest(String),
+    ///生成验证码图片出错
+    #[error("build captcha failed, {0}")]
+    CaptchaError(#[from] ImageError),
 }
 
 impl ApiError {
+    ///创建一个新的请求参数错误
+    pub fn new_bad_request(err: &str) -> Self {
+        Self::BadRequest(err.to_string())
+    }
     ///错误代码
     pub fn code(&self) -> u32 {
         match self {
             Self::Common(_) => 5000,
             Self::DatabaseError(_) => 5001,
+            Self::InvalidSessionID => 5002,
+            Self::BadRequest(_) => 5003,
+            Self::CaptchaError(_) => 5004,
         }
     }
     ///记录错误信息
@@ -45,7 +62,10 @@ impl Serialize for ApiError {
 
 impl ResponseError for ApiError {
     fn status_code(&self) -> StatusCode {
-        StatusCode::OK
+        if let Self::BadRequest(_) = self {
+            return StatusCode::BAD_REQUEST;
+        }
+        StatusCode::INTERNAL_SERVER_ERROR
     }
     fn error_response(&self) -> HttpResponse<BoxBody> {
         self.log_error();

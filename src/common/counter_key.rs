@@ -1,5 +1,3 @@
-use std::ops::Deref;
-
 ///计数器key定义
 pub enum CounterKey {
     ///最后一个注册用户id
@@ -12,13 +10,5 @@ impl CounterKey {
         match self {
             Self::LastUserId => "users.last_id",
         }
-    }
-}
-
-impl Deref for CounterKey {
-    type Target = str;
-
-    fn deref(&self) -> &Self::Target {
-        self.as_str()
     }
 }

@@ -21,7 +21,7 @@ impl CreateUsersCollection {
     }
     ///获取集合对象
     fn collection(&self) -> Collection<Document> {
-        self.database_data.collection(&CollectionName::Users)
+        self.database_data.collection(CollectionName::Users)
     }
 }
 

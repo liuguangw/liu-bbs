@@ -12,17 +12,15 @@ pub async fn show(
     captcha_service: web::Data<CaptchaService>,
     query: web::Query<SessionRequest>,
 ) -> Result<CaptchaResponse, ApiError> {
-    let session = session_service.load_session(&query.id).await?;
-    if session.is_none() {
-        return Err(ApiError::Common("invalid session id".to_string()));
-    }
-    let mut session = session.unwrap();
-    //todo deal error
-    let captcha = captcha_service.build().unwrap();
+    let mut session = match session_service.load_session(&query.id).await? {
+        Some(v) => v,
+        None => return Err(ApiError::InvalidSessionID),
+    };
+    let captcha = captcha_service.build()?;
     session
         .data
         .insert("code".to_string(), captcha.phrase.to_string());
-    session_service.save_session(&mut session).await?;
+    session_service.update_session(&session).await?;
     //show captcha
     Ok(CaptchaResponse::new(captcha.data()))
 }

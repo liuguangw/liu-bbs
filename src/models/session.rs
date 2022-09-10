@@ -4,7 +4,6 @@ use std::{
     ops::Add,
     time::{Duration, SystemTime},
 };
-use uuid::Uuid;
 
 ///用户会话
 #[derive(Serialize, Deserialize)]
@@ -43,11 +42,5 @@ impl Session {
             None => (0, 30 * 60),
         };
         Self::build_new_session(user_id, duration_secs)
-    }
-    ///设置随机id
-    pub fn set_random_id(&mut self) {
-        let id = Uuid::new_v4().simple();
-        let id = id.encode_lower(&mut Uuid::encode_buffer()).to_string();
-        self.id = id;
     }
 }
