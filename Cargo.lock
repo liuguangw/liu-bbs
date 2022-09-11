@@ -1005,6 +1005,7 @@ dependencies = [
  "futures",
  "mongodb",
  "os_info",
+ "pin-project-lite",
  "rand 0.8.5",
  "regex",
  "serde",

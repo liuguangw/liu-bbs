@@ -1,9 +1,12 @@
 use crate::{
-    common::{ApiError, ResponseResult},
+    common::{ApiError, ApiRequest, ResponseResult},
     http::{requests::LoginRequest, responses::LoginResponse},
     services::{SessionService, UserService},
 };
-use actix_web::{post, web};
+use actix_web::{
+    post,
+    web::{self, Json},
+};
 use std::time::SystemTime;
 
 ///用户登录
@@ -11,9 +14,8 @@ use std::time::SystemTime;
 pub async fn login(
     session_service: web::Data<SessionService>,
     user_service: web::Data<UserService>,
-    req: web::Json<LoginRequest>,
+    req: ApiRequest<Json<LoginRequest>>,
 ) -> ResponseResult<LoginResponse> {
-    req.check_input()?;
     let mut session = match session_service.load_session(&req.session_id).await? {
         Some(v) => v,
         None => return Err(ApiError::InvalidSessionID),

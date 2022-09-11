@@ -4,7 +4,11 @@ use crate::{
     models::User,
     services::{SessionService, UserService},
 };
-use actix_web::{dev::ConnectionInfo, post, web};
+use actix_web::{
+    dev::ConnectionInfo,
+    post,
+    web::{self, Json},
+};
 use std::time::SystemTime;
 
 ///用户注册
@@ -13,7 +17,7 @@ pub async fn register(
     session_service: web::Data<SessionService>,
     user_service: web::Data<UserService>,
     conn: ConnectionInfo,
-    req: ApiRequest<RegisterRequest>,
+    req: ApiRequest<Json<RegisterRequest>>,
 ) -> ResponseResult<LoginResponse> {
     let mut session = match session_service.load_session(&req.session_id).await? {
         Some(v) => v,

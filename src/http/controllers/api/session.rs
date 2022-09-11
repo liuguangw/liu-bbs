@@ -16,7 +16,7 @@ pub async fn init_session(
         .duration_since(SystemTime::now())
         .unwrap();
     let response = InitSessionResponse {
-        id: session.id,
+        session_id: session.id,
         expires_in: expires_in.as_secs(),
     };
     Ok(response.into())

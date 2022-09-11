@@ -1,9 +1,13 @@
-use std::{future::Future, ops::Deref, pin::Pin};
-
-use actix_web::{web::Json, FromRequest};
-use serde::de::DeserializeOwned;
-
 use super::ApiError;
+use actix_web::{web, FromRequest};
+use futures::ready;
+use pin_project_lite::pin_project;
+use std::{
+    future::Future,
+    ops::Deref,
+    pin::Pin,
+    task::{Context, Poll},
+};
 
 ///检测用户的输入请求
 pub trait ApiRequestValidator {
@@ -12,40 +16,88 @@ pub trait ApiRequestValidator {
 }
 
 ///api请求封装
-pub struct ApiRequest<T>
+///
+/// 如果需要验证用户的输入，那么 `T` 需要实现 [`ApiRequestValidator`] 和 [`FromRequest`]
+pub struct ApiRequest<T>(pub T);
+
+impl<T> FromRequest for ApiRequest<T>
 where
-    T: DeserializeOwned + ApiRequestValidator,
+    T: FromRequest + ApiRequestValidator,
 {
-    inner_item: Json<T>,
-}
-//T不能是引用类型
-impl<T: DeserializeOwned + ApiRequestValidator + 'static> FromRequest for ApiRequest<T> {
     type Error = ApiError;
-    type Future = Pin<Box<dyn Future<Output = Result<Self, Self::Error>>>>;
+    type Future = ApiRequestFuture<T::Future>;
 
     fn from_request(
         req: &actix_web::HttpRequest,
         payload: &mut actix_web::dev::Payload,
     ) -> Self::Future {
-        let s = Json::<T>::from_request(req, payload);
-        Box::pin(async move {
-            match s.await {
-                //输入验证
-                Ok(v) => match v.check_input() {
-                    Ok(_) => Ok(Self { inner_item: v }),
-                    Err(e) => Err(e),
-                },
-                //json解析错误
-                Err(e) => Err(ApiError::BadRequest(format!("{}", e))),
-            }
-        })
+        ApiRequestFuture {
+            fut: T::from_request(req, payload),
+        }
     }
 }
 
-impl<T: DeserializeOwned + ApiRequestValidator> Deref for ApiRequest<T> {
-    type Target = Json<T>;
+pin_project! {
+    pub struct ApiRequestFuture<Fut>{
+        #[pin]
+        fut: Fut,
+    }
+}
+
+impl<Fut, T, E> Future for ApiRequestFuture<Fut>
+where
+    Fut: Future<Output = Result<T, E>>,
+    E: Into<actix_web::Error>,
+    T: FromRequest + ApiRequestValidator,
+{
+    type Output = Result<ApiRequest<T>, ApiError>;
+
+    fn poll(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Self::Output> {
+        let p = self.project();
+        //Result<T, E>
+        let res = ready!(p.fut.poll(cx));
+        match res {
+            Ok(v) => {
+                //输入验证
+                let check_result = v
+                    .check_input()
+                    //Result<(),ApiError> => Result<ApiRequest<T>, ApiError>
+                    .map(|_| ApiRequest(v));
+                Poll::Ready(check_result)
+            }
+            Err(e) => {
+                //解析失败
+                let err: actix_web::Error = e.into();
+                let message = format!("{}", err);
+                //转化为ApiError
+                Poll::Ready(Err(ApiError::BadRequest(message)))
+            }
+        }
+    }
+}
+
+impl<T> Deref for ApiRequest<T> {
+    type Target = T;
 
     fn deref(&self) -> &Self::Target {
-        &self.inner_item
+        &self.0
+    }
+}
+
+impl<T> ApiRequestValidator for web::Json<T>
+where
+    T: ApiRequestValidator,
+{
+    fn check_input(&self) -> Result<(), ApiError> {
+        self.0.check_input()
+    }
+}
+
+impl<T> ApiRequestValidator for web::Query<T>
+where
+    T: ApiRequestValidator,
+{
+    fn check_input(&self) -> Result<(), ApiError> {
+        self.0.check_input()
     }
 }

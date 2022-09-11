@@ -1,4 +1,4 @@
-use crate::common::ApiError;
+use crate::common::{ApiError, ApiRequestValidator};
 use regex::Regex;
 use serde::Deserialize;
 
@@ -17,9 +17,9 @@ pub struct LoginRequest {
     pub password: String,
 }
 
-impl LoginRequest {
+impl ApiRequestValidator for LoginRequest {
     ///检测用户输入
-    pub fn check_input(&self) -> Result<(), ApiError> {
+    fn check_input(&self) -> Result<(), ApiError> {
         if self.session_id.is_empty() {
             return Err(ApiError::new_bad_request("会话id不能为空"));
         }

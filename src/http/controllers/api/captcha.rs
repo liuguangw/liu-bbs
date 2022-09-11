@@ -1,19 +1,18 @@
 use crate::{
-    common::ApiError,
+    common::{ApiError, ApiRequest},
     http::requests::SessionRequest,
     services::{CaptchaService, SessionService},
 };
-use actix_web::{get, http::header, web, CustomizeResponder, Responder};
-use tokio::task;
+use actix_web::{get, http::header, rt::task, web, CustomizeResponder, Responder};
 
 ///显示验证码图片
 #[get("/captcha/show")]
 pub async fn show(
     session_service: web::Data<SessionService>,
     captcha_service: web::Data<CaptchaService>,
-    query: web::Query<SessionRequest>,
+    query: ApiRequest<web::Query<SessionRequest>>,
 ) -> Result<CustomizeResponder<Vec<u8>>, ApiError> {
-    let mut session = match session_service.load_session(&query.id).await? {
+    let mut session = match session_service.load_session(&query.session_id).await? {
         Some(v) => v,
         None => return Err(ApiError::InvalidSessionID),
     };
