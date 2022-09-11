@@ -22,12 +22,10 @@ pub async fn show(
         captcha_service.build()
     });
     let captcha = captcha_task.await.unwrap()?;
-    session
-        .data
-        .insert("code".to_string(), captcha.phrase.to_string());
+    session.data.insert("code".to_string(), captcha.phrase);
     session_service.update_session(&session).await?;
     //show captcha
-    let captcha_data = Vec::from(captcha.data());
+    let captcha_data = captcha.raw_data;
     let resp = captcha_data
         .customize()
         .insert_header((header::CONTENT_TYPE, "image/png"))
