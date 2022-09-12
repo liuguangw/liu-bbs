@@ -1,4 +1,8 @@
-use crate::{common::DatabaseResult, data::SessionRepository, models::Session};
+use crate::{
+    common::{ApiError, DatabaseResult},
+    data::SessionRepository,
+    models::Session,
+};
 use uuid::Uuid;
 ///会话服务
 pub struct SessionService {
@@ -37,5 +41,36 @@ impl SessionService {
     pub async fn update_session(&self, session: &Session) -> DatabaseResult<()> {
         self.session_repo.update_session(session).await?;
         Ok(())
+    }
+
+    ///写入验证码到数据库
+    pub async fn set_captcha_code(
+        &self,
+        session: &mut Session,
+        captcha_code: String,
+    ) -> DatabaseResult<()> {
+        session
+            .data
+            .insert("captcha_code".to_string(), captcha_code);
+        self.update_session(session).await
+    }
+    ///检测验证码是否正确
+    pub async fn verify_captcha_code(
+        &self,
+        session: &mut Session,
+        input_code: &str,
+    ) -> Result<(), ApiError> {
+        //验证码只能校验一次
+        let captcha_code = match session.data.remove("captcha_code") {
+            Some(v) => v,
+            None => return Err(ApiError::new_bad_request("无效的验证码")),
+        };
+        //update session
+        self.update_session(session).await?;
+        if captcha_code.eq_ignore_ascii_case(input_code) {
+            Ok(())
+        } else {
+            Err(ApiError::new_bad_request("验证码错误"))
+        }
     }
 }

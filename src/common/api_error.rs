@@ -15,6 +15,9 @@ pub enum ApiError {
     ///无效的会话id
     #[error("invalid session id")]
     InvalidSessionID,
+    ///用户未登录
+    #[error("user is not logged in")]
+    UserNotLogin,
     ///请求参数错误
     #[error("{0}")]
     BadRequest(String),
@@ -34,8 +37,9 @@ impl ApiError {
             Self::Common(_) => 5000,
             Self::DatabaseError(_) => 5001,
             Self::InvalidSessionID => 5002,
-            Self::BadRequest(_) => 5003,
-            Self::CaptchaError(_) => 5004,
+            Self::UserNotLogin => 5003,
+            Self::BadRequest(_) => 5004,
+            Self::CaptchaError(_) => 5005,
         }
     }
     ///记录错误信息

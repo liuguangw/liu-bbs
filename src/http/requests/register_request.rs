@@ -7,9 +7,6 @@ use crate::common::{ApiError, ApiRequestValidator};
 #[derive(Deserialize, Default)]
 #[serde(default)]
 pub struct RegisterRequest {
-    ///会话id
-    #[serde(rename = "sid")]
-    pub session_id: String,
     ///验证码
     pub captcha_code: String,
     ///用户名
@@ -23,9 +20,6 @@ pub struct RegisterRequest {
 impl ApiRequestValidator for RegisterRequest {
     ///检测用户输入
     fn check_input(&self) -> Result<(), ApiError> {
-        if self.session_id.is_empty() {
-            return Err(ApiError::new_bad_request("会话id不能为空"));
-        }
         if self.captcha_code.is_empty() {
             return Err(ApiError::new_bad_request("验证码不能为空"));
         }

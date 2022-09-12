@@ -1,7 +1,6 @@
 use super::ApiError;
 use actix_web::{web, FromRequest};
 use futures::ready;
-use pin_project_lite::pin_project;
 use std::{
     future::Future,
     ops::Deref,
@@ -32,16 +31,13 @@ where
         payload: &mut actix_web::dev::Payload,
     ) -> Self::Future {
         ApiRequestFuture {
-            fut: T::from_request(req, payload),
+            fut: Box::pin(T::from_request(req, payload)),
         }
     }
 }
 
-pin_project! {
-    pub struct ApiRequestFuture<Fut>{
-        #[pin]
-        fut: Fut,
-    }
+pub struct ApiRequestFuture<Fut> {
+    fut: Pin<Box<Fut>>,
 }
 
 impl<Fut, T, E> Future for ApiRequestFuture<Fut>
@@ -53,9 +49,9 @@ where
     type Output = Result<ApiRequest<T>, ApiError>;
 
     fn poll(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Self::Output> {
-        let p = self.project();
+        let p = self.get_mut();
         //Result<T, E>
-        let res = ready!(p.fut.poll(cx));
+        let res = ready!(p.fut.as_mut().poll(cx));
         match res {
             Ok(v) => {
                 //输入验证

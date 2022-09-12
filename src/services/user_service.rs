@@ -1,5 +1,5 @@
 use crate::{
-    common::{ApiError, CounterKey, DatabaseError},
+    common::{ApiError, CounterKey, DatabaseError, DatabaseResult},
     data::{CounterRepository, UserRepository},
     models::User,
 };
@@ -77,6 +77,26 @@ impl UserService {
             Err(ApiError::Common("密码错误".to_string()))
         } else {
             Ok(user)
+        }
+    }
+
+    ///通过用户id加载用户信息
+    pub async fn load_option_user_info_by_id(&self, user_id: i64) -> DatabaseResult<Option<User>> {
+        self.user_repo
+            .find_by_id(user_id)
+            .await
+            .map_err(|e| e.into())
+    }
+
+    ///通过用户id加载用户信息
+    pub async fn load_user_info_by_id(&self, user_id: i64) -> Result<User, ApiError> {
+        let option_user_info = self.load_option_user_info_by_id(user_id).await?;
+        match option_user_info {
+            Some(user_info) => Ok(user_info),
+            None => {
+                let message = format!("用户id: {}不存在", user_id);
+                Err(ApiError::Common(message))
+            }
         }
     }
 }

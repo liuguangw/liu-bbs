@@ -1,5 +1,5 @@
 use crate::{
-    common::{ApiError, ApiRequest},
+    common::ApiError,
     http::requests::SessionRequest,
     services::{CaptchaService, SessionService},
 };
@@ -10,20 +10,18 @@ use actix_web::{get, http::header, rt::task, web, CustomizeResponder, Responder}
 pub async fn show(
     session_service: web::Data<SessionService>,
     captcha_service: web::Data<CaptchaService>,
-    query: ApiRequest<web::Query<SessionRequest>>,
+    session_req: SessionRequest,
 ) -> Result<CustomizeResponder<Vec<u8>>, ApiError> {
-    let mut session = match session_service.load_session(&query.session_id).await? {
-        Some(v) => v,
-        None => return Err(ApiError::InvalidSessionID),
-    };
     let captcha_task = task::spawn_blocking(move || {
         // This is running on a blocking thread.
         // Blocking here is ok.
         captcha_service.build()
     });
     let captcha = captcha_task.await.unwrap()?;
-    session.data.insert("code".to_string(), captcha.phrase);
-    session_service.update_session(&session).await?;
+    let mut session = session_req.0;
+    session_service
+        .set_captcha_code(&mut session, captcha.phrase)
+        .await?;
     //show captcha
     let captcha_data = captcha.raw_data;
     let resp = captcha_data
