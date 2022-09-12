@@ -16,13 +16,13 @@ use actix_web::{
 ///用户注册
 #[post("/auth/register")]
 pub async fn register(
-    session_service: web::Data<SessionService>,
-    user_service: web::Data<UserService>,
-    conn: ConnectionInfo,
     req: ApiRequest<Json<RegisterRequest>>,
     session_req: SessionRequest,
+    conn: ConnectionInfo,
+    session_service: web::Data<SessionService>,
+    user_service: web::Data<UserService>,
 ) -> ResponseResult<LoginResponse> {
-    let mut session = session_req.0;
+    let mut session = session_req.get_inner();
     //检测验证码
     session_service
         .verify_captcha_code(&mut session, &req.captcha_code)

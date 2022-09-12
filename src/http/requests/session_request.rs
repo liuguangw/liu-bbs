@@ -16,7 +16,14 @@ pub struct SessionRequestParam {
 ///
 /// sid通过url参数传递
 /// 如果sid为空，或者sid在数据库内不存在,则返回 [`ApiError::InvalidSessionID`]
-pub struct SessionRequest(pub Session);
+pub struct SessionRequest(Session);
+
+impl SessionRequest {
+    ///获取session
+    pub fn get_inner(self) -> Session {
+        self.0
+    }
+}
 
 impl FromRequest for SessionRequest {
     type Error = ApiError;
