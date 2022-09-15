@@ -1,7 +1,7 @@
 use crate::common::{CollectionName, DatabaseData, Migration, MigrationLog};
 use crate::migrations::{
-    CreateCountersCollection, CreateSessionsCollection, CreateUserEmailsCollection,
-    CreateUsersCollection,
+    CreateCountersCollection, CreateForumGroupsCollection, CreateForumsCollection,
+    CreateSessionsCollection, CreateUserEmailsCollection, CreateUsersCollection,
 };
 use futures::stream::TryStreamExt;
 use mongodb::bson::doc;
@@ -64,6 +64,8 @@ impl MigratorRepository {
             Box::new(CreateUsersCollection::new(&self.database_data)),
             Box::new(CreateUserEmailsCollection::new(&self.database_data)),
             Box::new(CreateSessionsCollection::new(&self.database_data)),
+            Box::new(CreateForumGroupsCollection::new(&self.database_data)),
+            Box::new(CreateForumsCollection::new(&self.database_data)),
         ]
     }
 }

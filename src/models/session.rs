@@ -23,24 +23,31 @@ pub struct Session {
     pub expired_at: SystemTime,
 }
 
-impl Session {
-    fn build_new_session(user_id: i64, duration_secs: u64) -> Self {
+impl Default for Session {
+    fn default() -> Self {
         let created_at = SystemTime::now();
-        let expired_at = created_at.add(Duration::from_secs(duration_secs));
+        let expired_at = created_at.add(Duration::from_secs(30 * 60));
         Self {
             id: Default::default(),
-            user_id,
+            user_id: Default::default(),
             data: Default::default(),
             created_at,
             expired_at,
         }
     }
-    ///为用户创建一个新的session对象
-    pub fn new(user_id: Option<i64>) -> Self {
-        let (user_id, duration_secs) = match user_id {
-            Some(value) => (value, 30 * 24 * 3600),
-            None => (0, 30 * 60),
-        };
-        Self::build_new_session(user_id, duration_secs)
+}
+
+impl Session {
+    ///为登录用户创建一个新的session对象
+    pub fn new(user_id: i64) -> Self {
+        let created_at = SystemTime::now();
+        let duration_secs = 30 * 24 * 3600;
+        let expired_at = created_at.add(Duration::from_secs(duration_secs));
+        Self {
+            user_id,
+            created_at,
+            expired_at,
+            ..Default::default()
+        }
     }
 }

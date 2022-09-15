@@ -12,8 +12,29 @@ pub struct AuthSessionRequest(Session);
 
 impl AuthSessionRequest {
     ///获取session
-    pub fn get_inner(self) -> Session {
+    pub fn into_inner(self) -> Session {
         self.0
+    }
+    ///load_session
+    async fn load_session_from_request(
+        session_req_fut: <SessionRequest as FromRequest>::Future,
+    ) -> Result<Self, ApiError> {
+        let session_req = session_req_fut.await.map_err(|e| {
+            if let ApiError::InvalidSessionID = e {
+                //InvalidSessionID -> UserNotLogin
+                ApiError::UserNotLogin
+            } else {
+                //其他错误不变(例如数据库出错)
+                e
+            }
+        })?;
+        let session = session_req.into_inner();
+        //用户id不能为0
+        if session.user_id == 0 {
+            Err(ApiError::UserNotLogin)
+        } else {
+            Ok(AuthSessionRequest(session))
+        }
     }
 }
 
@@ -33,29 +54,8 @@ impl FromRequest for AuthSessionRequest {
         req: &actix_web::HttpRequest,
         payload: &mut actix_web::dev::Payload,
     ) -> Self::Future {
-        let session_req_mut = SessionRequest::from_request(req, payload);
-        let fut = async move {
-            match session_req_mut.await {
-                Ok(session_req) => {
-                    let session = session_req.get_inner();
-                    //用户id不能为0
-                    if session.user_id == 0 {
-                        Err(ApiError::UserNotLogin)
-                    } else {
-                        Ok(AuthSessionRequest(session))
-                    }
-                }
-                Err(e) => {
-                    if let ApiError::InvalidSessionID = e {
-                        //InvalidSessionID -> UserNotLogin
-                        Err(ApiError::UserNotLogin)
-                    } else {
-                        //其他错误不变(例如数据库出错)
-                        Err(e)
-                    }
-                }
-            }
-        };
+        let session_req_fut = SessionRequest::from_request(req, payload);
+        let fut = Self::load_session_from_request(session_req_fut);
         Box::pin(fut)
     }
 }

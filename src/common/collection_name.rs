@@ -10,6 +10,10 @@ pub enum CollectionName {
     UserEmails,
     ///用户会话集合
     Sessions,
+    ///论坛分区集合
+    ForumGroups,
+    ///论坛集合
+    Forums,
 }
 
 impl CollectionName {
@@ -21,6 +25,8 @@ impl CollectionName {
             Self::Users => "users",
             Self::UserEmails => "user_emails",
             Self::Sessions => "sessions",
+            Self::ForumGroups => "forum_groups",
+            Self::Forums => "forums",
         }
     }
 }

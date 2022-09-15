@@ -19,7 +19,7 @@ pub async fn login(
     session_service: web::Data<SessionService>,
     user_service: web::Data<UserService>,
 ) -> ResponseResult<LoginResponse> {
-    let mut session = session_req.get_inner();
+    let mut session = session_req.into_inner();
     //检测验证码
     session_service
         .verify_captcha_code(&mut session, &req.captcha_code)

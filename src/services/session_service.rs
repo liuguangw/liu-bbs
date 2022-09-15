@@ -31,7 +31,10 @@ impl SessionService {
 
     ///创建新会话,并保存到数据库
     pub async fn create_new_session(&self, user_id: Option<i64>) -> DatabaseResult<Session> {
-        let mut session = Session::new(user_id);
+        let mut session = match user_id {
+            Some(uid) => Session::new(uid),
+            None => Default::default(),
+        };
         session.id = Self::generate_random_id();
         self.session_repo.insert_session(&session).await?;
         Ok(session)

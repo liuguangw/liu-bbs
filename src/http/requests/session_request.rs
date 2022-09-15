@@ -1,7 +1,7 @@
 use crate::{common::ApiError, models::Session, services::SessionService};
 use actix_web::{web, FromRequest};
 use serde::Deserialize;
-use std::{future::Future, pin::Pin};
+use std::{future::Future, pin::Pin, time::SystemTime};
 
 ///附带会话id的请求
 #[derive(Deserialize, Default)]
@@ -20,8 +20,45 @@ pub struct SessionRequest(Session);
 
 impl SessionRequest {
     ///获取session
-    pub fn get_inner(self) -> Session {
+    pub fn into_inner(self) -> Session {
         self.0
+    }
+    ///load_session
+    async fn load_session_from_request(
+        session_service: web::Data<SessionService>,
+        query_fut: <web::Query<SessionRequestParam> as FromRequest>::Future,
+    ) -> Result<Self, ApiError> {
+        //从query中获取SessionRequestParam
+        let request_params_opt = match query_fut.await {
+            Ok(t) => {
+                if t.session_id.is_empty() {
+                    None
+                } else {
+                    Some(t.0)
+                }
+            }
+            Err(_) => None,
+        };
+        match request_params_opt {
+            Some(params) => {
+                let session_id = params.session_id;
+                //从数据库中加载session
+                let session = session_service
+                    .load_session(&session_id)
+                    .await?
+                    //map None as ApiError::InvalidSessionID
+                    .ok_or(ApiError::InvalidSessionID)?;
+                //判断是否已经过期
+                let time_now = SystemTime::now();
+                //expired_at <= time_now
+                if session.expired_at.le(&time_now) {
+                    Err(ApiError::InvalidSessionID)
+                } else {
+                    Ok(SessionRequest(session))
+                }
+            }
+            None => Err(ApiError::InvalidSessionID),
+        }
     }
 }
 
@@ -35,34 +72,7 @@ impl FromRequest for SessionRequest {
     ) -> Self::Future {
         let session_service = req.app_data::<web::Data<SessionService>>().unwrap().clone();
         let query_fut = web::Query::<SessionRequestParam>::from_request(req, payload);
-        let fut = async move {
-            //从query中获取SessionRequestParam
-            let request_params_opt = match query_fut.await {
-                Ok(t) => {
-                    if t.session_id.is_empty() {
-                        None
-                    } else {
-                        Some(t.0)
-                    }
-                }
-                Err(_) => None,
-            };
-            match request_params_opt {
-                Some(params) => {
-                    let session_id = params.session_id;
-                    //从数据库中加载session
-                    match session_service.load_session(&session_id).await {
-                        Ok(session_opt) => match session_opt {
-                            Some(session) => Ok(SessionRequest(session)),
-                            None => Err(ApiError::InvalidSessionID),
-                        },
-                        //数据库错误
-                        Err(e) => Err(ApiError::DatabaseError(e)),
-                    }
-                }
-                None => Err(ApiError::InvalidSessionID),
-            }
-        };
+        let fut = Self::load_session_from_request(session_service, query_fut);
         Box::pin(fut)
     }
 }

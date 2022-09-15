@@ -18,7 +18,7 @@ pub async fn show(
         captcha_service.build()
     });
     let captcha = captcha_task.await.unwrap()?;
-    let mut session = session_req.get_inner();
+    let mut session = session_req.into_inner();
     session_service
         .set_captcha_code(&mut session, captcha.phrase)
         .await?;
