@@ -14,6 +14,8 @@ pub enum CollectionName {
     ForumGroups,
     ///论坛集合
     Forums,
+    ///论坛树结构
+    ForumTrees,
 }
 
 impl CollectionName {
@@ -27,6 +29,7 @@ impl CollectionName {
             Self::Sessions => "sessions",
             Self::ForumGroups => "forum_groups",
             Self::Forums => "forums",
+            Self::ForumTrees => "forum_trees",
         }
     }
 }

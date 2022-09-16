@@ -9,6 +9,8 @@ pub struct Forum {
     pub id: i64,
     ///分区id
     pub forum_group_id: i64,
+    ///是否为顶级论坛
+    pub is_root: bool,
     ///名称
     pub name: String,
     ///简介
@@ -27,4 +29,23 @@ pub struct Forum {
     ///更新时间
     #[serde(with = "crate::common::serde_helpers::bson_system_time")]
     pub updated_at: SystemTime,
+}
+
+impl Default for Forum {
+    fn default() -> Self {
+        let time_now = SystemTime::now();
+        Self {
+            id: 0,
+            forum_group_id: 0,
+            is_root: false,
+            name: Default::default(),
+            description: Default::default(),
+            icon_url: Default::default(),
+            topic_count: Default::default(),
+            reply_count: Default::default(),
+            order_id: Default::default(),
+            created_at: time_now,
+            updated_at: time_now,
+        }
+    }
 }

@@ -22,3 +22,18 @@ pub struct ForumGroup {
     #[serde(with = "crate::common::serde_helpers::bson_system_time")]
     pub updated_at: SystemTime,
 }
+
+impl Default for ForumGroup {
+    fn default() -> Self {
+        let time_now = SystemTime::now();
+        Self {
+            id: 0,
+            name: Default::default(),
+            description: Default::default(),
+            icon_url: Default::default(),
+            order_id: Default::default(),
+            created_at: time_now,
+            updated_at: time_now,
+        }
+    }
+}
