@@ -30,14 +30,8 @@ impl SessionRequest {
     ) -> Result<Self, ApiError> {
         //从query中获取SessionRequestParam
         let request_params_opt = match query_fut.await {
-            Ok(t) => {
-                if t.session_id.is_empty() {
-                    None
-                } else {
-                    Some(t.0)
-                }
-            }
-            Err(_) => None,
+            Ok(t) if !t.session_id.is_empty() => Some(t.0),
+            _ => None,
         };
         match request_params_opt {
             Some(params) => {

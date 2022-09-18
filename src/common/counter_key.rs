@@ -6,6 +6,10 @@ pub enum CounterKey {
     LastForumGroupId,
     ///最后一个论坛id
     LastForumId,
+    ///最后一个帖子id
+    LastTopicId,
+    ///最后一个回帖id
+    LastTopicReplyId,
 }
 
 impl CounterKey {
@@ -15,6 +19,8 @@ impl CounterKey {
             Self::LastUserId => "users.last_id",
             Self::LastForumGroupId => "forum_groups.last_id",
             Self::LastForumId => "forums.last_id",
+            Self::LastTopicId => "topics.last_id",
+            Self::LastTopicReplyId => "topic_replies.last_id",
         }
     }
 }

@@ -16,6 +16,12 @@ pub enum CollectionName {
     Forums,
     ///论坛树结构
     ForumTrees,
+    ///帖子集合
+    Topics,
+    /// 帖子内容集合
+    TopicContents,
+    ///帖子回复集合
+    TopicReplies,
 }
 
 impl CollectionName {
@@ -30,6 +36,9 @@ impl CollectionName {
             Self::ForumGroups => "forum_groups",
             Self::Forums => "forums",
             Self::ForumTrees => "forum_trees",
+            Self::Topics => "topics",
+            Self::TopicContents => "topic_contents",
+            Self::TopicReplies => "topic_replies",
         }
     }
 }

@@ -2,6 +2,7 @@ use crate::common::{CollectionName, DatabaseData, Migration, MigrationLog};
 use crate::migrations::{
     CreateCountersCollection, CreateDefaultForums, CreateForumGroupsCollection,
     CreateForumTreesCollection, CreateForumsCollection, CreateSessionsCollection,
+    CreateTopicContentsCollection, CreateTopicRepliesCollection, CreateTopicsCollection,
     CreateUserEmailsCollection, CreateUsersCollection,
 };
 use futures::stream::TryStreamExt;
@@ -69,6 +70,9 @@ impl MigratorRepository {
             Box::new(CreateForumsCollection::new(&self.database_data)),
             Box::new(CreateForumTreesCollection::new(&self.database_data)),
             Box::new(CreateDefaultForums::new(&self.database_data)),
+            Box::new(CreateTopicsCollection::new(&self.database_data)),
+            Box::new(CreateTopicContentsCollection::new(&self.database_data)),
+            Box::new(CreateTopicRepliesCollection::new(&self.database_data)),
         ]
     }
 }
