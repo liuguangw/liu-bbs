@@ -153,7 +153,7 @@ impl Migration for CreateDefaultForums {
                 },
                 doc! {
                     "$inc": doc! {
-                        "value": 1,
+                        "value": 1i64,
                     }
                 },
                 counter_opt.clone(),
@@ -166,7 +166,7 @@ impl Migration for CreateDefaultForums {
                 },
                 doc! {
                     "$inc": doc! {
-                        "value": forums.len() as i32,
+                        "value": forums.len() as i64,
                     }
                 },
                 counter_opt,

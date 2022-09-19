@@ -5,6 +5,7 @@ use crate::data::{
 };
 use crate::routes;
 use crate::services::{CaptchaService, DemoService, MigratorService, SessionService, UserService};
+use actix_web::dev::{ServiceFactory, ServiceRequest};
 use actix_web::{rt, web, App, HttpServer};
 use clap::Args;
 use std::sync::Arc;
@@ -42,19 +43,17 @@ impl ServerCommand {
         let database_data = Arc::new(database_data);
         //执行数据迁移
         self.do_migrate(&database_data).await?;
+        //captcha service(字体只加载一次)
+        let captcha_service = web::Data::new(CaptchaService::default());
         //run api server
         println!(
             "api server run at http://{}:{}",
             app_config.server.host, app_config.server.port
         );
-        HttpServer::new(move || {
-            App::new()
-                .configure(routes::configure_routes)
-                .configure(|cfg| configure_data(cfg, &database_data))
-        })
-        .bind((app_config.server.host.as_str(), app_config.server.port))?
-        .run()
-        .await?;
+        HttpServer::new(move || app_factory(App::new(), &database_data, &captcha_service))
+            .bind((app_config.server.host.as_str(), app_config.server.port))?
+            .run()
+            .await?;
         println!("api server stopped");
         Ok(())
     }
@@ -70,21 +69,36 @@ impl AppCommand for ServerCommand {
     }
 }
 
+///app工厂函数
+pub fn app_factory<T>(
+    app: App<T>,
+    database_data: &Arc<DatabaseData>,
+    captcha_service: &web::Data<CaptchaService>,
+) -> App<T>
+where
+    T: ServiceFactory<ServiceRequest, Config = (), Error = actix_web::Error, InitError = ()>,
+{
+    app.configure(routes::configure_routes)
+        .configure(|cfg| configure_data(cfg, database_data, captcha_service))
+}
+
 ///配置共享数据
-fn configure_data(cfg: &mut web::ServiceConfig, database_data: &Arc<DatabaseData>) {
+fn configure_data(
+    cfg: &mut web::ServiceConfig,
+    database_data: &Arc<DatabaseData>,
+    captcha_service: &web::Data<CaptchaService>,
+) {
     let demo_repo = DemoRepository::new(database_data);
     let demo_service = DemoService::new(demo_repo);
     //
     let session_repo = SessionRepository::new(database_data);
     let session_service = SessionService::new(session_repo);
     //
-    let captcha_service = CaptchaService::default();
-    //
     let counter_repo = Arc::new(CounterRepository::new(database_data));
     let user_repo = UserRepository::new(database_data);
     let user_service = UserService::new(user_repo, &counter_repo);
     cfg.app_data(web::Data::new(demo_service))
         .app_data(web::Data::new(session_service))
-        .app_data(web::Data::new(captcha_service))
+        .app_data(captcha_service.clone())
         .app_data(web::Data::new(user_service));
 }

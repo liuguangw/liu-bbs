@@ -8,13 +8,13 @@ pub trait Migration: Send + Sync {
     fn name(&self) -> &str;
     ///执行迁移, 函数签名如下
     ///
-    ///```rust
+    ///```ignore
     ///async fn up(&self) -> Result<(), MigrationError>
     ///```
     async fn up(&self) -> Result<(), MigrationError>;
     ///回滚迁移, 函数签名如下
     ///
-    ///```rust
+    ///```ignore
     ///async fn down(&self) -> Result<(), MigrationError>
     ///```
     async fn down(&self) -> Result<(), MigrationError>;
