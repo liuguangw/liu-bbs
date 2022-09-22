@@ -30,7 +30,7 @@ impl CounterRepository {
     pub async fn increment(&self, key: CounterKey) -> mongodb::error::Result<i64> {
         let update_data = doc! {
             "$inc": doc! {
-                "value": 1,
+                "value": 1i64,
             }
         };
         let filter = doc! {

@@ -1,10 +1,13 @@
 use super::app_command::AppCommand;
 use crate::common::{AppConfig, DatabaseData, LaunchError, MigrationError};
 use crate::data::{
-    CounterRepository, DemoRepository, MigratorRepository, SessionRepository, UserRepository,
+    CounterRepository, DemoRepository, ForumRepository, MigratorRepository, SessionRepository,
+    TopicContentRepository, TopicRepository, UserRepository,
 };
 use crate::routes;
-use crate::services::{CaptchaService, DemoService, MigratorService, SessionService, UserService};
+use crate::services::{
+    CaptchaService, DemoService, MigratorService, SessionService, TopicService, UserService,
+};
 use actix_web::dev::{ServiceFactory, ServiceRequest};
 use actix_web::{rt, web, App, HttpServer};
 use clap::Args;
@@ -97,8 +100,16 @@ fn configure_data(
     let counter_repo = Arc::new(CounterRepository::new(database_data));
     let user_repo = UserRepository::new(database_data);
     let user_service = UserService::new(user_repo, &counter_repo);
+    //
+    let forum_repo = ForumRepository::new(database_data);
+    let topic_repo = TopicRepository::new(database_data);
+    let topic_content_repo = TopicContentRepository::new(database_data);
+    let topic_service =
+        TopicService::new(&counter_repo, forum_repo, topic_repo, topic_content_repo);
+    //
     cfg.app_data(web::Data::new(demo_service))
         .app_data(web::Data::new(session_service))
         .app_data(captcha_service.clone())
-        .app_data(web::Data::new(user_service));
+        .app_data(web::Data::new(user_service))
+        .app_data(web::Data::new(topic_service));
 }

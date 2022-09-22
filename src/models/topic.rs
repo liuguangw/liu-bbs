@@ -40,3 +40,26 @@ pub struct Topic {
     #[serde(with = "crate::common::serde_helpers::bson_system_time")]
     pub updated_at: SystemTime,
 }
+
+impl Default for Topic {
+    fn default() -> Self {
+        let time_now = SystemTime::now();
+        Self {
+            id: 0,
+            author_user_id: 0,
+            last_reply_user_id: None,
+            forum_id: 0,
+            title: Default::default(),
+            is_publish: Default::default(),
+            is_lock: Default::default(),
+            is_block: Default::default(),
+            is_delete: Default::default(),
+            view_count: 0,
+            reply_count: 0,
+            publish_at: None,
+            last_reply_at: None,
+            created_at: time_now,
+            updated_at: time_now,
+        }
+    }
+}

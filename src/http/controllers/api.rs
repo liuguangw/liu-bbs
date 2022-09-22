@@ -4,6 +4,7 @@ pub mod auth;
 pub mod captcha;
 ///用户会话相关
 pub mod session;
-
+///帖子相关
+pub mod topic;
 ///用户信息相关
 pub mod user;

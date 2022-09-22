@@ -1,4 +1,6 @@
-use crate::http::controllers::{self, api::auth, api::captcha, api::session, api::user};
+use crate::http::controllers::{
+    self, api::auth, api::captcha, api::session, api::topic, api::user,
+};
 use actix_web::{web::ServiceConfig, Scope};
 
 /// 加载api路由
@@ -10,6 +12,7 @@ pub fn load_routes(scope: Scope, cfg: &mut ServiceConfig) {
         .service(captcha::show)
         .service(auth::register)
         .service(auth::login)
-        .service(user::info);
+        .service(user::info)
+        .service(topic::post_topic);
     cfg.service(scope);
 }
