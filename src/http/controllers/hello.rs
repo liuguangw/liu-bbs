@@ -6,7 +6,7 @@ use actix_web::get;
 pub async fn hello() -> actix_web::HttpResponse {
     use actix_web::http::header;
     actix_web::HttpResponse::Found()
-        .insert_header((header::LOCATION, "/swagger-ui/"))
+        .insert_header((header::LOCATION, "/openapi-doc/"))
         .finish()
 }
 

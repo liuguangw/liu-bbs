@@ -1,0 +1,72 @@
+paths:
+  info:
+    get:
+      summary: 当前用户信息
+      description: 获取当前登录的用户信息
+      security:
+        - SessionId: []
+      responses:
+        "200":
+          description: 用户信息
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    $ref: ./components/schemas.yml#/ApiResponse/properties/code
+                  data:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                        description: 用户id
+                      username:
+                        type: string
+                        description: 用户名
+                      nickname:
+                        type: string
+                        description: 昵称
+                      avatar:
+                        type: string
+                        description: 头像
+                      exp:
+                        type: integer
+                        description: 经验值
+                      coin:
+                        type: integer
+                        description: 金币值
+                      status_email_verified:
+                        type: boolean
+                        description: 邮箱是否已验证
+                      status_mobile_verified:
+                        type: boolean
+                        description: 手机号是否已验证
+                      register_ip:
+                        type: string
+                        description: 注册时的ip
+                      created_at:
+                        type: string
+                        description: 注册时间
+                      updated_at:
+                        type: string
+                        description: 最后更新时间
+                  message:
+                    $ref: ./components/schemas.yml#/ApiResponse/properties/message
+              example:
+                code: 0
+                data:
+                  id: 1
+                  username: liuguang
+                  nickname: 流光
+                  avatar: ""
+                  exp: 0
+                  coin: 0
+                  status_email_verified: false
+                  status_mobile_verified: false
+                  register_ip: 127.0.0.1
+                  created_at: "2022-09-22 16:11:17"
+                  updated_at: "2022-09-22 16:11:17"
+                message: ""
+        "500":
+          $ref: ./components/responses.yml#/ErrorResponse

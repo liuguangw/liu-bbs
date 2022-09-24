@@ -1,0 +1,13 @@
+# See https://redocly.com/docs/cli/configuration/
+
+apis:
+  # Update the apiName with your actual API name, and the version with your actual API version.
+  liu_bbs@v0.1.0:
+    # Update the path to your OpenAPI root file
+    root: ./public/openapi/openapi.yml
+lint:
+  extends:
+    - recommended
+  rules: 
+    info-license: off
+    operation-operationId: off

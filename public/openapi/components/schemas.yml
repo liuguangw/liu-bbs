@@ -1,0 +1,15 @@
+ApiResponse:
+  description: 通用response结构
+  type: object
+  properties:
+    code:
+      type: integer
+      description: 响应码
+      default: 0
+    data:
+      type: object
+      description: 数据
+    message:
+      type: string
+      description: 错误信息
+      default: ""

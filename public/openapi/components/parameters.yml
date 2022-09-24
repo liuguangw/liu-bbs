@@ -1,0 +1,7 @@
+SessionId:
+  name: sid
+  in: query
+  description: 会话id
+  required: true
+  schema:
+    type: string

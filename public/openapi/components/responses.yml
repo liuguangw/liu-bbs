@@ -1,0 +1,50 @@
+LoginResponse:
+  description: 登录成功的响应
+  content:
+    application/json:
+      schema:
+        type: object
+        properties:
+          code:
+            $ref: ./schemas.yml#/ApiResponse/properties/code
+          data:
+            type: object
+            properties:
+              user_id:
+                type: integer
+                description: 用户id
+              sid:
+                type: string
+                description: 会话唯一标识
+              expires_in:
+                type: integer
+                description: 有效期(单位:秒)
+          message:
+            $ref: ./schemas.yml#/ApiResponse/properties/message
+      example:
+        code: 0
+        data:
+          user_id: 1
+          sid: bf72006ccfa34ff6a3668a06b72e8961
+          expires_in: 2591999
+        message: ""
+ErrorResponse:
+  description: 错误响应
+  content:
+    application/json:
+      schema:
+        $ref: ./schemas.yml#/ApiResponse
+      example:
+        code: 5000
+        data:
+        message: 其他错误
+ValidationErrorResponse:
+  description: 验证错误响应
+  content:
+    application/json:
+      schema:
+        $ref: ./schemas.yml#/ApiResponse
+      example:
+        code: 5000
+        data:
+        message: 输入验证失败

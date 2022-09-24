@@ -1,0 +1,69 @@
+paths:
+  register:
+    post:
+      summary: 用户注册
+      parameters:
+        - $ref: ./components/parameters.yml#/SessionId
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                captcha_code:
+                  type: string
+                  description: 验证码
+                username:
+                  type: string
+                  description: 用户名
+                nickname:
+                  type: string
+                  description: 昵称
+                password:
+                  type: string
+                  description: 密码
+              example:
+                captcha_code: a35ra
+                username: liuguang
+                nickname: 流光
+                password: "123456"
+      responses:
+        "200":
+          $ref: ./components/responses.yml#/LoginResponse
+        "500":
+          $ref: ./components/responses.yml#/ErrorResponse
+        "400":
+          $ref: ./components/responses.yml#/ValidationErrorResponse
+  login:
+    post:
+      summary: 用户登录
+      parameters:
+        - $ref: ./components/parameters.yml#/SessionId
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                captcha_code:
+                  type: string
+                  description: 验证码
+                username:
+                  type: string
+                  description: 用户名
+                password:
+                  type: string
+                  description: 密码
+              example:
+                captcha_code: a35ra
+                username: liuguang
+                password: "123456"
+      responses:
+        "200":
+          $ref: ./components/responses.yml#/LoginResponse
+        "500":
+          $ref: ./components/responses.yml#/ErrorResponse
+        "400":
+          $ref: ./components/responses.yml#/ValidationErrorResponse

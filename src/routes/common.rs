@@ -8,11 +8,15 @@ pub fn load_routes(cfg: &mut ServiceConfig) {
     {
         use actix_files::Files;
         cfg.service(
-            Files::new("/swagger-ui", "./public/swagger-ui")
+            Files::new("/openapi-doc", "./public/swagger-ui")
                 .index_file("index.html")
                 .redirect_to_slash_directory(),
         )
-        .service(controllers::openapi_yml);
+        .service(
+            Files::new("/openapi", "./public/openapi")
+                .index_file("index.html")
+                .redirect_to_slash_directory(),
+        );
     }
     cfg.service(controllers::hello_world)
         .route("/", web::get().to(|| async { "hello world".to_string() }));

@@ -1,0 +1,27 @@
+openapi: "3.0.2"
+info:
+  title: liu-bbs
+  description: liu-bbs openapi page
+  version: "0.1.0"
+servers:
+  - url: http://127.0.0.1:8000/api
+    description: Development server
+components: 
+  securitySchemes: 
+    SessionId:
+      type: apiKey
+      name: sid
+      in: query
+      description: 会话id
+security: []
+paths:
+  /session/init:
+    $ref: ./session.yml#/paths/session_init
+  /captcha/show:
+    $ref: ./session.yml#/paths/captcha_show
+  /auth/register:
+    $ref: ./auth.yml#/paths/register
+  /auth/login:
+    $ref: ./auth.yml#/paths/login
+  /user/info:
+    $ref: ./user.yml#/paths/info
