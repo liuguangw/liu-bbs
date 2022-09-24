@@ -1,10 +1,18 @@
-use crate::common::ResponseResult;
-use crate::services::DemoService;
-use actix_web::{get, web};
+use actix_web::get;
+
+/// 跳转到swagger-ui页面
+#[cfg(feature = "swagger-ui")]
+#[get("/")]
+pub async fn hello() -> actix_web::HttpResponse {
+    use actix_web::http::header;
+    actix_web::HttpResponse::Found()
+        .insert_header((header::LOCATION, "/swagger-ui/"))
+        .finish()
+}
 
 /// 输出hello world
-#[get("/hello")]
-pub async fn hello(demo_service: web::Data<DemoService>) -> ResponseResult<String> {
-    let str = demo_service.hello().await?;
-    Ok(str.into())
+#[cfg(not(feature = "swagger-ui"))]
+#[get("/")]
+pub async fn hello() -> &'static str {
+    "hello world"
 }

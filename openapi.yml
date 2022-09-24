@@ -1,0 +1,258 @@
+openapi: "3.0.2"
+info:
+  title: liu-bbs API
+  version: "0.1.0"
+servers:
+  - url: http://127.0.0.1:8000/api
+    description: Development server
+components:
+  schemas:
+    ApiResponse:
+      description: 通用response结构
+      type: object
+      properties:
+        code:
+          type: integer
+          description: 响应码
+          default: 0
+        data:
+          type: object
+          description: 数据
+        message:
+          type: string
+          description: 错误信息
+          default: ""
+  securitySchemes:
+    SessionId:
+      type: apiKey
+      name: sid
+      in: query
+      description: 会话id
+  parameters:
+    SessionId:
+      name: sid
+      in: query
+      description: 会话id
+      required: true
+      schema:
+        type: string
+  responses:
+    LoginResponse:
+      description: 登录成功的响应
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              code:
+                $ref: "#/components/schemas/ApiResponse/properties/code"
+              data:
+                type: object
+                properties:
+                  user_id:
+                    type: integer
+                    description: 用户id
+                  sid:
+                    type: string
+                    description: 会话唯一标识
+                  expires_in:
+                    type: integer
+                    description: 有效期(单位:秒)
+              message:
+                $ref: "#/components/schemas/ApiResponse/properties/message"
+          example:
+            code: 0
+            data:
+              user_id: 1
+              sid: bf72006ccfa34ff6a3668a06b72e8961
+              expires_in: 2591999
+            message: ""
+    ErrorResponse:
+      description: 错误响应
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ApiResponse"
+          example:
+            code: 5000
+            data:
+            message: 其他错误
+paths:
+  /session/init:
+    post:
+      description: 初始化session
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    $ref: "#/components/schemas/ApiResponse/properties/code"
+                  data:
+                    type: object
+                    properties:
+                      sid:
+                        type: string
+                        description: 会话唯一标识
+                      expires_in:
+                        type: integer
+                        description: 有效期(单位:秒)
+                  message:
+                    $ref: "#/components/schemas/ApiResponse/properties/message"
+              example:
+                code: 0
+                data:
+                  sid: 2ddd7445a49b42eda96d68db499e1cb1
+                  expires_in: 1799
+                message: ""
+        "500":
+          $ref: "#/components/responses/ErrorResponse"
+  /captcha/show:
+    get:
+      description: 验证码图片
+      parameters:
+        - $ref: "#/components/parameters/SessionId"
+      responses:
+        "200":
+          description: OK
+          content:
+            image/png: {}
+        "500":
+          $ref: "#/components/responses/ErrorResponse"
+  /auth/register:
+    post:
+      description: 用户注册
+      parameters:
+        - $ref: "#/components/parameters/SessionId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                captcha_code:
+                  type: string
+                  description: 验证码
+                username:
+                  type: string
+                  description: 用户名
+                nickname:
+                  type: string
+                  description: 昵称
+                password:
+                  type: string
+                  description: 密码
+              example:
+                captcha_code: a35ra
+                username: liuguang
+                nickname: 流光
+                password: "123456"
+      responses:
+        "200":
+          $ref: "#/components/responses/LoginResponse"
+        "500":
+          $ref: "#/components/responses/ErrorResponse"
+  /auth/login:
+    post:
+      description: 用户登录
+      parameters:
+        - $ref: "#/components/parameters/SessionId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                captcha_code:
+                  type: string
+                  description: 验证码
+                username:
+                  type: string
+                  description: 用户名
+                password:
+                  type: string
+                  description: 密码
+              example:
+                captcha_code: a35ra
+                username: liuguang
+                password: "123456"
+      responses:
+        "200":
+          $ref: "#/components/responses/LoginResponse"
+        "500":
+          $ref: "#/components/responses/ErrorResponse"
+  /user/info:
+    get:
+      description: 获取当前登录的用户信息
+      security: 
+        - SessionId: []
+      responses:
+        "200":
+          description: 用户信息
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    $ref: "#/components/schemas/ApiResponse/properties/code"
+                  data:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                        description: 用户id
+                      username:
+                        type: string
+                        description: 用户名
+                      nickname:
+                        type: string
+                        description: 昵称
+                      avatar:
+                        type: string
+                        description: 头像
+                      exp:
+                        type: integer
+                        description: 经验值
+                      coin:
+                        type: integer
+                        description: 金币值
+                      status_email_verified:
+                        type: boolean
+                        description: 邮箱是否已验证
+                      status_mobile_verified:
+                        type: boolean
+                        description: 手机号是否已验证
+                      register_ip:
+                        type: string
+                        description: 注册时的ip
+                      created_at:
+                        type: string
+                        description: 注册时间
+                      updated_at:
+                        type: string
+                        description: 最后更新时间
+                  message:
+                    $ref: "#/components/schemas/ApiResponse/properties/message"
+              example:
+                code: 0
+                data:
+                  id: 1
+                  username: liuguang
+                  nickname: 流光
+                  avatar: ''
+                  exp: 0
+                  coin: 0
+                  status_email_verified: false
+                  status_mobile_verified: false
+                  register_ip: 127.0.0.1
+                  created_at: '2022-09-22 16:11:17'
+                  updated_at: '2022-09-22 16:11:17'
+                message: ''
+        "500":
+          $ref: "#/components/responses/ErrorResponse"
