@@ -28,6 +28,24 @@ LoginResponse:
           sid: bf72006ccfa34ff6a3668a06b72e8961
           expires_in: 2591999
         message: ""
+NoDataResponse:
+  description: 无内容的成功响应
+  content:
+    application/json:
+      schema:
+        type: object
+        properties:
+          code:
+            $ref: ./schemas.yml#/ApiResponse/properties/code
+          data:
+            type: object
+            description: 默认为null
+          message:
+            $ref: ./schemas.yml#/ApiResponse/properties/message
+      example:
+        code: 0
+        data:
+        message: ""
 ErrorResponse:
   description: 错误响应
   content:

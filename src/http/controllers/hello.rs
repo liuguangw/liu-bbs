@@ -1,7 +1,7 @@
 use actix_web::get;
 
-/// 跳转到swagger-ui页面
-#[cfg(feature = "swagger-ui")]
+/// 跳转到openapi文档页面
+#[cfg(feature = "openapi-doc")]
 #[get("/")]
 pub async fn hello() -> actix_web::HttpResponse {
     use actix_web::http::header;
@@ -11,7 +11,7 @@ pub async fn hello() -> actix_web::HttpResponse {
 }
 
 /// 输出hello world
-#[cfg(not(feature = "swagger-ui"))]
+#[cfg(not(feature = "openapi-doc"))]
 #[get("/")]
 pub async fn hello() -> &'static str {
     "hello world"

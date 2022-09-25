@@ -3,6 +3,8 @@ paths:
     get:
       summary: 当前用户信息
       description: 获取当前登录的用户信息
+      tags:
+        - user
       security:
         - SessionId: []
       responses:

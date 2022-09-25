@@ -2,6 +2,8 @@ paths:
   register:
     post:
       summary: 用户注册
+      tags:
+        - auth
       parameters:
         - $ref: ./components/parameters.yml#/SessionId
       requestBody:
@@ -38,6 +40,8 @@ paths:
   login:
     post:
       summary: 用户登录
+      tags:
+        - auth
       parameters:
         - $ref: ./components/parameters.yml#/SessionId
       requestBody:

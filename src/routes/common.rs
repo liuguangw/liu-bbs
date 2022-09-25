@@ -3,12 +3,12 @@ use actix_web::web::{self, ServiceConfig};
 
 /// 加载普通路由
 pub fn load_routes(cfg: &mut ServiceConfig) {
-    //swagger-ui 路由
-    #[cfg(feature = "swagger-ui")]
+    //openapi-doc 路由
+    #[cfg(feature = "openapi-doc")]
     {
         use actix_files::Files;
         cfg.service(
-            Files::new("/openapi-doc", "./public/swagger-ui")
+            Files::new("/openapi-doc", "./public/openapi_doc")
                 .index_file("index.html")
                 .redirect_to_slash_directory(),
         )

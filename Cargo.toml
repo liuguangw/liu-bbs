@@ -31,9 +31,9 @@ version = "1.20.1"
 features = ["fs", "io-std", "io-util", "rt-multi-thread", "sync", "signal"]
 
 [features]
-default = ["swagger-ui"]
-swagger-ui = ["dep:actix-files"]
+default = ["openapi-doc"]
+openapi-doc = ["dep:actix-files"]
 
 [package.metadata.docs.rs]
 # docs.rs features
-features = ["swagger-ui"]
+features = ["openapi-doc"]

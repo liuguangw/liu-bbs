@@ -1,0 +1,43 @@
+paths:
+  create:
+    post:
+      summary: 发表帖子
+      description: 发表帖子,如果 `is_publish` 参数为false, 则只保存为新草稿
+      tags:
+        - topic
+      security:
+        - SessionId: []
+      parameters:
+        - name: forum_id
+          in: path
+          description: 论坛id
+          schema:
+            type: integer
+          example: 1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                  description: 标题
+                content:
+                  type: string
+                  description: 内容
+                is_publish:
+                  type: boolean
+                  description: 是否发布
+              example:
+                title: 测试帖子
+                content: 这是一个测试帖子
+                is_publish: true
+      responses:
+        "200":
+          $ref: ./components/responses.yml#/NoDataResponse
+        "500":
+          $ref: ./components/responses.yml#/ErrorResponse
+        "400":
+          $ref: ./components/responses.yml#/ValidationErrorResponse

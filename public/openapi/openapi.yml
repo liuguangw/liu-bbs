@@ -25,3 +25,5 @@ paths:
     $ref: ./auth.yml#/paths/login
   /user/info:
     $ref: ./user.yml#/paths/info
+  /forums/{forum_id}/topics:
+    $ref: ./topic.yml#/paths/create

@@ -2,6 +2,8 @@ paths:
   session_init:
     post:
       summary: 初始化session
+      tags:
+        - session
       responses:
         "200":
           description: OK
@@ -35,6 +37,8 @@ paths:
   captcha_show:
     get:
       summary: 验证码图片
+      tags:
+        - session
       parameters:
         - $ref: ./components/parameters.yml#/SessionId
       responses:
@@ -44,5 +48,3 @@ paths:
             image/png: {}
         "500":
           $ref: ./components/responses.yml#/ErrorResponse
-        "400":
-          $ref: ./components/responses.yml#/ValidationErrorResponse
