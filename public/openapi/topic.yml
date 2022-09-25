@@ -1,5 +1,5 @@
 paths:
-  create:
+  store:
     post:
       summary: 发表帖子
       description: 发表帖子,如果 `is_publish` 参数为false, 则只保存为新草稿

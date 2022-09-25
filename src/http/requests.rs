@@ -1,9 +1,11 @@
 mod auth_session_request;
+mod filter_topic_list_request;
 mod login_request;
 mod register_request;
 mod save_topic_request;
 mod session_request;
 pub use auth_session_request::AuthSessionRequest;
+pub use filter_topic_list_request::FilterTopicListRequest;
 pub use login_request::LoginRequest;
 pub use register_request::RegisterRequest;
 pub use save_topic_request::SaveTopicRequest;

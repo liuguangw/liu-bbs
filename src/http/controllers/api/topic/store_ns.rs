@@ -9,9 +9,9 @@ use actix_web::{
     web::{self, Json},
 };
 
-///发帖或保存帖子为草稿
+///发帖或保存新草稿
 #[post("/forums/{forum_id}/topics")]
-pub async fn post_topic(
+pub async fn store(
     req: ApiRequest<Json<SaveTopicRequest>>,
     path: web::Path<i64>,
     session_req: AuthSessionRequest,
