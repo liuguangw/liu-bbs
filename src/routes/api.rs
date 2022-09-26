@@ -9,6 +9,7 @@ pub fn load_routes(scope: Scope, cfg: &mut ServiceConfig) {
         .service(auth::register)
         .service(auth::login)
         .service(user::info)
-        .service(topic::store);
+        .service(topic::store)
+        .service(topic::index);
     cfg.service(scope);
 }

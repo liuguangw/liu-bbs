@@ -26,4 +26,4 @@ paths:
   /user/info:
     $ref: ./user.yml#/paths/info
   /forums/{forum_id}/topics:
-    $ref: ./topic.yml#/paths/store
+    $ref: ./topic.yml#/resources

@@ -3,7 +3,10 @@ use crate::{
     data::{CounterRepository, UserRepository},
     models::User,
 };
-use std::sync::Arc;
+use std::{
+    collections::{hash_map::Entry, HashMap},
+    sync::Arc,
+};
 
 ///用户相关服务
 pub struct UserService {
@@ -98,5 +101,37 @@ impl UserService {
                 Err(ApiError::Common(message))
             }
         }
+    }
+}
+
+///使用缓存的用户信息
+pub struct UserInfoState<'a> {
+    user_info_map: HashMap<i64, Option<User>>,
+    user_service: &'a UserService,
+}
+
+impl<'a> UserInfoState<'a> {
+    ///构造函数
+    pub fn new(user_service: &'a UserService) -> Self {
+        Self {
+            user_info_map: HashMap::new(),
+            user_service,
+        }
+    }
+    ///通过用户id加载用户信息
+    ///
+    /// 在需要多次查询用户信息时使用, 不会重复查询同一个用户id,优先使用map。
+    pub async fn load_user_info(&mut self, user_id: i64) -> DatabaseResult<Option<&User>> {
+        //如果不存在,则插入
+        if let Entry::Vacant(entry) = self.user_info_map.entry(user_id) {
+            let db_user_info = self
+                .user_service
+                .load_option_user_info_by_id(user_id)
+                .await?;
+            entry.insert(db_user_info);
+            //dbg!(user_id);
+        };
+        let user_info = self.user_info_map.get(&user_id).unwrap();
+        Ok(user_info.as_ref())
     }
 }

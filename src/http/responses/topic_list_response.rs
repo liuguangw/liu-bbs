@@ -1,4 +1,6 @@
+use crate::models::User;
 use serde::Serialize;
+use std::time::SystemTime;
 
 ///作者信息节点
 #[derive(Serialize, Clone)]
@@ -19,7 +21,7 @@ pub struct TopicListNode {
     ///作者用户id
     pub author_user_id: i64,
     ///作者信息
-    pub author_info: AuthorInfoNode,
+    pub author_info: Option<AuthorInfoNode>,
     ///最后回复的用户id
     pub last_reply_user_id: Option<i64>,
     ///最后回复的用户信息
@@ -39,24 +41,30 @@ pub struct TopicListNode {
     ///回复数
     pub reply_count: i64,
     ///发布时间
-    pub publish_at: String,
+    #[serde(serialize_with = "crate::common::serde_helpers::json_system_time::serialize_option")]
+    pub publish_at: Option<SystemTime>,
     ///最后回复时间
-    pub last_reply_at: String,
+    #[serde(serialize_with = "crate::common::serde_helpers::json_system_time::serialize_option")]
+    pub last_reply_at: Option<SystemTime>,
     ///创建时间
-    pub created_at: String,
+    #[serde(serialize_with = "crate::common::serde_helpers::json_system_time::serialize")]
+    pub created_at: SystemTime,
     ///更新时间
-    pub updated_at: String,
+    #[serde(serialize_with = "crate::common::serde_helpers::json_system_time::serialize")]
+    pub updated_at: SystemTime,
 }
 
 ///分页信息
 #[derive(Serialize)]
 pub struct PaginationInfo {
     ///当前是第几页, n >= 1
-    pub current_page: i64,
+    pub current_page: u64,
     ///总共有几页
-    pub total_page: i64,
+    pub total_page: u64,
     ///每页最多数据条数
-    pub per_page: i64,
+    pub per_page: u64,
+    ///当前页数据条数
+    pub item_count: u64,
 }
 
 ///帖子列表响应
@@ -66,4 +74,57 @@ pub struct TopicListResponse {
     pub topic_list: Vec<TopicListNode>,
     ///分页信息
     pub pagination_info: PaginationInfo,
+}
+
+impl PaginationInfo {
+    ///从总条数构造
+    ///
+    /// 需要满足条件 per_page>=1 current_page>=1, 此函数内部不验证这两个条件
+    pub fn from_total_count(item_total_count: u64, per_page: u64, current_page: u64) -> Self {
+        let mut total_page = item_total_count / per_page;
+        if item_total_count % per_page != 0 {
+            total_page += 1;
+        }
+        //current_page不能越界
+        let current_page = if total_page == 0 {
+            1
+        } else if current_page > total_page {
+            total_page
+        } else {
+            current_page
+        };
+        //计算当前页数据条数
+        let item_count = if item_total_count == 0 {
+            0
+        } else if current_page < total_page {
+            per_page
+        } else {
+            let s = item_total_count % per_page;
+            if s == 0 {
+                per_page
+            } else {
+                s
+            }
+        };
+        Self {
+            current_page,
+            total_page,
+            per_page,
+            item_count,
+        }
+    }
+    ///计算偏移参数
+    pub fn offset(&self) -> u64 {
+        (self.current_page - 1) * self.per_page
+    }
+}
+
+impl From<&User> for AuthorInfoNode {
+    fn from(user: &User) -> Self {
+        Self {
+            id: user.id,
+            nickname: user.nickname.to_string(),
+            avatar: user.avatar.to_string(),
+        }
+    }
 }

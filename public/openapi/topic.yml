@@ -1,43 +1,235 @@
-paths:
-  store:
-    post:
-      summary: 发表帖子
-      description: 发表帖子,如果 `is_publish` 参数为false, 则只保存为新草稿
-      tags:
-        - topic
-      security:
-        - SessionId: []
-      parameters:
-        - name: forum_id
-          in: path
-          description: 论坛id
+components:
+  AuthorInfoNode:
+    type: object
+    description: 作者信息
+    properties:
+      id:
+        type: integer
+        description: 用户id
+      nickname:
+        type: string
+        description: 昵称
+      avatar:
+        type: string
+        description: 头像
+  TopicListNode:
+    type: object
+    properties:
+      id:
+        type: integer
+        description: 帖子id
+      author_user_id:
+        type: integer
+        description: 作者用户id
+      author_info:
+        $ref: "#/components/AuthorInfoNode"
+      last_reply_user_id:
+        type: integer
+        description: 最后回复的用户id
+      last_reply_user_info:
+          $ref: "#/components/AuthorInfoNode"
+          description: 最后回复的用户信息
+      title:
+        type: string
+        description: 标题
+      is_publish:
+        type: boolean
+        description: 是否已经发布
+      is_lock:
+        type: boolean
+        description: 是否已锁定
+      is_block:
+        type: boolean
+        description: 是否已经屏蔽
+      is_delete:
+        type: boolean
+        description: 是否已删除
+      view_count:
+        type: integer
+        description: 阅读数
+      reply_count:
+        type: integer
+        description: 回复数
+      publish_at:
+        type: string
+        description: 发布时间
+      last_reply_at:
+        type: string
+        description: 最后回复时间
+      created_at:
+        type: string
+        description: 创建时间
+      updated_at:
+        type: string
+        description: 更新时间
+parameters: 
+  forum_id:
+    name: forum_id
+    in: path
+    description: 论坛id
+    required: true
+    schema:
+      type: integer
+    example: 1
+  sort_type:
+    name: sort_type
+    in: query
+    description: 排序方式
+    schema:
+      type: integer
+    example: 1
+  per_page:
+    name: per_page
+    in: query
+    description: 每页最多条数
+    schema:
+      type: integer
+    example: 20
+  page:
+    name: page
+    in: query
+    description: 当前页
+    schema:
+      type: integer
+    example: 1
+resources:
+  post:
+    summary: 发表帖子
+    description: 发表帖子,如果 `is_publish` 参数为 `false` , 则只保存为新草稿
+    tags:
+      - topic
+    security:
+      - SessionId: []
+    parameters:
+      - $ref: "#/parameters/forum_id"
+    requestBody:
+      required: true
+      content:
+        application/json:
           schema:
-            type: integer
-          example: 1
-      requestBody:
-        required: true
+            type: object
+            properties:
+              title:
+                type: string
+                description: 标题
+              content:
+                type: string
+                description: 内容
+              is_publish:
+                type: boolean
+                description: 是否发布
+            example:
+              title: 测试帖子
+              content: 这是一个测试帖子
+              is_publish: true
+    responses:
+      "200":
+        $ref: ./components/responses.yml#/NoDataResponse
+      "500":
+        $ref: ./components/responses.yml#/ErrorResponse
+      "400":
+        $ref: ./components/responses.yml#/ValidationErrorResponse
+  get:
+    summary: 论坛的帖子列表
+    description: 获取论坛的帖子列表
+    tags:
+      - topic
+    parameters:
+      - $ref: "#/parameters/forum_id"
+      - $ref: "#/parameters/sort_type"
+      - $ref: "#/parameters/per_page"
+      - $ref: "#/parameters/page"
+    responses:
+      "200":
+        description: 帖子列表
         content:
           application/json:
             schema:
               type: object
               properties:
-                title:
-                  type: string
-                  description: 标题
-                content:
-                  type: string
-                  description: 内容
-                is_publish:
-                  type: boolean
-                  description: 是否发布
-              example:
-                title: 测试帖子
-                content: 这是一个测试帖子
-                is_publish: true
-      responses:
-        "200":
-          $ref: ./components/responses.yml#/NoDataResponse
-        "500":
-          $ref: ./components/responses.yml#/ErrorResponse
-        "400":
-          $ref: ./components/responses.yml#/ValidationErrorResponse
+                code:
+                  $ref: ./components/schemas.yml#/ApiResponse/properties/code
+                data:
+                  type: object
+                  description: 帖子列表信息
+                  properties:
+                    topic_list:
+                      type: array
+                      description: 帖子列表
+                      items:
+                        $ref: "#/components/TopicListNode"
+                    pagination_info:
+                      $ref: ./components/schemas.yml#/PaginationInfo
+                message:
+                  $ref: ./components/schemas.yml#/ApiResponse/properties/message
+            example:
+                code: 0
+                data:
+                  topic_list:
+                  - id: 3
+                    author_user_id: 1
+                    author_info:
+                      id: 1
+                      nickname: 流光
+                      avatar: ''
+                    last_reply_user_id:
+                    last_reply_user_info:
+                    title: 测试帖子
+                    is_publish: true
+                    is_lock: false
+                    is_block: false
+                    is_delete: false
+                    view_count: 0
+                    reply_count: 0
+                    publish_at: '2022-09-25 17:55:47'
+                    last_reply_at:
+                    created_at: '2022-09-25 17:55:47'
+                    updated_at: '2022-09-25 17:55:47'
+                  - id: 2
+                    author_user_id: 1
+                    author_info:
+                      id: 1
+                      nickname: 流光
+                      avatar: ''
+                    last_reply_user_id:
+                    last_reply_user_info:
+                    title: 测试帖子
+                    is_publish: true
+                    is_lock: false
+                    is_block: false
+                    is_delete: false
+                    view_count: 0
+                    reply_count: 0
+                    publish_at: '2022-09-25 17:47:46'
+                    last_reply_at:
+                    created_at: '2022-09-25 17:47:46'
+                    updated_at: '2022-09-25 17:47:46'
+                  - id: 1
+                    author_user_id: 1
+                    author_info:
+                      id: 1
+                      nickname: 流光
+                      avatar: ''
+                    last_reply_user_id:
+                    last_reply_user_info:
+                    title: 测试帖子
+                    is_publish: true
+                    is_lock: false
+                    is_block: false
+                    is_delete: false
+                    view_count: 0
+                    reply_count: 0
+                    publish_at: '2022-09-25 17:47:42'
+                    last_reply_at:
+                    created_at: '2022-09-25 17:47:42'
+                    updated_at: '2022-09-25 17:47:42'
+                  pagination_info:
+                    current_page: 1
+                    total_page: 1
+                    per_page: 20
+                    item_count: 3
+                message: ''
+      "500":
+        $ref: ./components/responses.yml#/ErrorResponse
+      "400":
+        $ref: ./components/responses.yml#/ValidationErrorResponse

@@ -9,4 +9,4 @@ pub use forum_service::ForumService;
 pub use migrator_service::MigratorService;
 pub use session_service::SessionService;
 pub use topic_service::TopicService;
-pub use user_service::UserService;
+pub use user_service::{UserInfoState, UserService};

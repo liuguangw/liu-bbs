@@ -55,7 +55,7 @@ impl ServerCommand {
             .bind((app_config.server.host.as_str(), app_config.server.port))?
             .run()
             .await?;
-        println!("api server stopped");
+        println!(" - api server stopped");
         Ok(())
     }
 }

@@ -1,5 +1,5 @@
 use crate::{
-    common::{ApiError, CounterKey, DatabaseError},
+    common::{ApiError, CounterKey, DatabaseError, DatabaseResult},
     data::{CounterRepository, ForumRepository, TopicContentRepository, TopicRepository},
     models::{Topic, TopicContent},
 };
@@ -71,5 +71,27 @@ impl TopicService {
                 .map_err(DatabaseError::from)?;
         }
         Ok(())
+    }
+
+    ///获取论坛帖子列表
+    pub async fn get_forum_topic_list(
+        &self,
+        forum_id: i64,
+        sort_type: u8,
+        offset: u64,
+        limit: i64,
+    ) -> DatabaseResult<Vec<Topic>> {
+        self.topic_repo
+            .get_forum_topic_list(forum_id, sort_type, offset, limit)
+            .await
+            .map_err(DatabaseError::from)
+    }
+
+    ///计算帖子总数
+    pub async fn get_forum_topic_count(&self, forum_id: i64) -> DatabaseResult<u64> {
+        self.topic_repo
+            .get_forum_topic_count(forum_id)
+            .await
+            .map_err(DatabaseError::from)
     }
 }

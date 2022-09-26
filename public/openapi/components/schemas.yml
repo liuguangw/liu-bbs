@@ -13,3 +13,19 @@ ApiResponse:
       type: string
       description: 错误信息
       default: ""
+PaginationInfo:
+  type: object
+  description: 分页信息
+  properties:
+    current_page:
+      type: integer
+      description: 当前是第几页, n >= 1
+    total_page:
+      type: integer
+      description: 总页数
+    per_page:
+      type: integer
+      description: 每页最多数据条数
+    item_count:
+      type: integer
+      description: 当前页数据条数
