@@ -128,3 +128,55 @@ impl From<&User> for AuthorInfoNode {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::PaginationInfo;
+
+    #[test]
+    fn common_pagination() {
+        let pagination = PaginationInfo::from_total_count(78, 10, 4);
+        assert_eq!(8, pagination.total_page);
+        assert_eq!(30, pagination.offset());
+        assert_eq!(10, pagination.item_count);
+    }
+
+    ///测试最后一页
+    #[test]
+    fn last_pagination() {
+        let pagination = PaginationInfo::from_total_count(78, 10, 8);
+        assert_eq!(8, pagination.total_page);
+        assert_eq!(70, pagination.offset());
+        assert_eq!(8, pagination.item_count);
+        let pagination = PaginationInfo::from_total_count(90, 10, 9);
+        assert_eq!(9, pagination.total_page);
+        assert_eq!(80, pagination.offset());
+        assert_eq!(10, pagination.item_count);
+    }
+
+    ///测试无数据的情况
+    #[test]
+    fn zero_pagination() {
+        let pagination = PaginationInfo::from_total_count(0, 10, 1);
+        assert_eq!(0, pagination.total_page);
+        assert_eq!(0, pagination.offset());
+        assert_eq!(0, pagination.item_count);
+        assert_eq!(1, pagination.current_page);
+    }
+
+    ///测试current_page>total_page的参数
+    #[test]
+    fn out_range_pagination() {
+        let pagination = PaginationInfo::from_total_count(78, 10, 15);
+        assert_eq!(8, pagination.total_page);
+        assert_eq!(70, pagination.offset());
+        assert_eq!(8, pagination.item_count);
+        assert_eq!(8, pagination.current_page);
+        //无数据
+        let pagination = PaginationInfo::from_total_count(0, 10, 15);
+        assert_eq!(0, pagination.total_page);
+        assert_eq!(0, pagination.offset());
+        assert_eq!(0, pagination.item_count);
+        assert_eq!(1, pagination.current_page);
+    }
+}

@@ -22,7 +22,9 @@ async fn test_main() {
     let captcha_service = web::Data::new(CaptchaService::default());
     //
     let app = test::init_service(app_factory(App::new(), &database_data, &captcha_service)).await;
-    let req = test::TestRequest::get().uri("/api/hello").to_request();
+    let req = test::TestRequest::post()
+        .uri("/api/session/init")
+        .to_request();
     let resp = test::call_service(&app, req).await;
     assert!(resp.status().is_success(), "request ok");
 }
