@@ -1,3 +1,4 @@
+use super::{CommonNodeResponse, ForumInfoResponse};
 use crate::models::User;
 use serde::Serialize;
 use std::time::SystemTime;
@@ -70,10 +71,14 @@ pub struct PaginationInfo {
 ///帖子列表响应
 #[derive(Serialize)]
 pub struct TopicListResponse {
-    ///帖子列表
-    pub topic_list: Vec<TopicListNode>,
+    ///论坛信息
+    pub forum_info: ForumInfoResponse,
+    ///论坛分区信息
+    pub forum_group_info: CommonNodeResponse,
     ///分页信息
     pub pagination_info: PaginationInfo,
+    ///帖子列表
+    pub topic_list: Vec<TopicListNode>,
 }
 
 impl PaginationInfo {

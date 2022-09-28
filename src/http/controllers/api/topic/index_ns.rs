@@ -2,9 +2,11 @@ use crate::{
     common::{ApiRequest, ResponseResult},
     http::{
         requests::FilterTopicListRequest,
-        responses::{AuthorInfoNode, PaginationInfo, TopicListNode, TopicListResponse},
+        responses::{
+            AuthorInfoNode, ForumInfoResponse, PaginationInfo, TopicListNode, TopicListResponse,
+        },
     },
-    services::{TopicService, UserInfoState, UserService},
+    services::{ForumService, TopicService, UserInfoState, UserService},
 };
 use actix_web::{get, web};
 
@@ -13,12 +15,26 @@ use actix_web::{get, web};
 pub async fn index(
     path: web::Path<i64>,
     req: ApiRequest<web::Query<FilterTopicListRequest>>,
+    forum_service: web::Data<ForumService>,
     topic_service: web::Data<TopicService>,
     user_service: web::Data<UserService>,
 ) -> ResponseResult<TopicListResponse> {
-    //帖子总数量
+    //获取论坛信息
     let forum_id = path.into_inner();
+    let forum_info = forum_service.load_forum_info_by_id(forum_id).await?;
+    let forum_group_id = forum_info.forum_group_id;
+    //帖子总数量
     let topic_count = topic_service.get_forum_topic_count(forum_id).await?;
+    let forum_info_response = {
+        let mut info_response = ForumInfoResponse::from(forum_info);
+        info_response.topic_count = topic_count as i64;
+        info_response
+    };
+    //获取分区信息
+    let forum_group_info = forum_service
+        .load_forum_group_info_by_id(forum_group_id)
+        .await?
+        .into();
     //计算分页数据
     let req = req.0.into_inner();
     let pagination_info = PaginationInfo::from_total_count(topic_count, req.per_page, req.page);
@@ -69,6 +85,8 @@ pub async fn index(
     }
     //response
     let topic_list_response = TopicListResponse {
+        forum_info: forum_info_response,
+        forum_group_info,
         topic_list: topic_node_list,
         pagination_info,
     };

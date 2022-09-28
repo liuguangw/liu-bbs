@@ -8,7 +8,7 @@ use std::sync::Arc;
 ///帖子相关服务
 pub struct TopicService {
     counter_repo: Arc<CounterRepository>,
-    forum_repo: ForumRepository,
+    forum_repo: Arc<ForumRepository>,
     topic_repo: TopicRepository,
     topic_content_repo: TopicContentRepository,
 }
@@ -17,13 +17,13 @@ impl TopicService {
     ///构造函数
     pub fn new(
         counter_repo: &Arc<CounterRepository>,
-        forum_repo: ForumRepository,
+        forum_repo: &Arc<ForumRepository>,
         topic_repo: TopicRepository,
         topic_content_repo: TopicContentRepository,
     ) -> Self {
         Self {
             counter_repo: counter_repo.clone(),
-            forum_repo,
+            forum_repo: forum_repo.clone(),
             topic_repo,
             topic_content_repo,
         }
@@ -35,17 +35,6 @@ impl TopicService {
         topic_info: &mut Topic,
         topic_content: &mut TopicContent,
     ) -> Result<(), ApiError> {
-        //判断论坛是否存在
-        let forum_id = topic_info.forum_id;
-        let forum_info = self
-            .forum_repo
-            .find_by_id(forum_id)
-            .await
-            .map_err(DatabaseError::from)?;
-        if forum_info.is_none() {
-            let message = format!("forum {} not found", forum_id);
-            return Err(ApiError::Common(message));
-        }
         //计算帖子id
         let topic_id = self
             .counter_repo
@@ -66,7 +55,7 @@ impl TopicService {
         //更新论坛的发帖数量
         if topic_info.is_publish {
             self.forum_repo
-                .incr_topic_count(forum_id, 1)
+                .incr_topic_count(topic_info.forum_id, 1)
                 .await
                 .map_err(DatabaseError::from)?;
         }

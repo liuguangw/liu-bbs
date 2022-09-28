@@ -29,3 +29,16 @@ PaginationInfo:
     item_count:
       type: integer
       description: 当前页数据条数
+CommonNodeResponse:
+  type: object
+  description: 通用节点信息
+  properties:
+    id:
+      type: integer
+      description: id
+    name:
+      type: string
+      description: 名称
+    description:
+      type: string
+      description: 简介

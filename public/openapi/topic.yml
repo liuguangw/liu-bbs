@@ -62,6 +62,28 @@ components:
       updated_at:
         type: string
         description: 更新时间
+  ForumInfo:
+    type: object
+    description: 论坛信息
+    properties:
+      id:
+        type: integer
+        description: 论坛id
+      name:
+        type: string
+        description: 名称
+      description:
+        type: string
+        description: 简介
+      icon_url:
+        type: string
+        description: 图标
+      topic_count:
+        type: integer
+        description: 主题帖总数量
+      reply_count:
+        type: integer
+        description: 回帖总数量
 parameters: 
   forum_id:
     name: forum_id
@@ -153,18 +175,39 @@ resources:
                   type: object
                   description: 帖子列表信息
                   properties:
+                    forum_info:
+                      $ref: "#/components/ForumInfo"
+                    forum_group_info:
+                      $ref: ./components/schemas.yml#/CommonNodeResponse
+                      description: 论坛分区信息
+                    pagination_info:
+                      $ref: ./components/schemas.yml#/PaginationInfo
                     topic_list:
                       type: array
                       description: 帖子列表
                       items:
                         $ref: "#/components/TopicListNode"
-                    pagination_info:
-                      $ref: ./components/schemas.yml#/PaginationInfo
                 message:
                   $ref: ./components/schemas.yml#/ApiResponse/properties/message
             example:
                 code: 0
                 data:
+                  forum_info:
+                    id: 1
+                    name: 默认论坛
+                    description: 初次运行时,系统创建的论坛
+                    icon_url: ''
+                    topic_count: 1
+                    reply_count: 0
+                  forum_group_info:
+                    id: 1
+                    name: 默认分区
+                    description: 初次运行时,系统创建的分区
+                  pagination_info:
+                    current_page: 1
+                    total_page: 1
+                    per_page: 20
+                    item_count: 3
                   topic_list:
                   - id: 3
                     author_user_id: 1
@@ -223,11 +266,6 @@ resources:
                     last_reply_at:
                     created_at: '2022-09-25 17:47:42'
                     updated_at: '2022-09-25 17:47:42'
-                  pagination_info:
-                    current_page: 1
-                    total_page: 1
-                    per_page: 20
-                    item_count: 3
                 message: ''
       "500":
         $ref: ./components/responses.yml#/ErrorResponse

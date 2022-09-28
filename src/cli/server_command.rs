@@ -5,7 +5,9 @@ use crate::data::{
     TopicContentRepository, TopicRepository, UserRepository,
 };
 use crate::routes;
-use crate::services::{CaptchaService, MigratorService, SessionService, TopicService, UserService};
+use crate::services::{
+    CaptchaService, ForumService, MigratorService, SessionService, TopicService, UserService,
+};
 use actix_web::dev::{ServiceFactory, ServiceRequest};
 use actix_web::{rt, web, App, HttpServer};
 use clap::Args;
@@ -96,14 +98,17 @@ fn configure_data(
     let user_repo = UserRepository::new(database_data);
     let user_service = UserService::new(user_repo, &counter_repo);
     //
-    let forum_repo = ForumRepository::new(database_data);
+    let forum_repo = Arc::new(ForumRepository::new(database_data));
     let topic_repo = TopicRepository::new(database_data);
     let topic_content_repo = TopicContentRepository::new(database_data);
     let topic_service =
-        TopicService::new(&counter_repo, forum_repo, topic_repo, topic_content_repo);
+        TopicService::new(&counter_repo, &forum_repo, topic_repo, topic_content_repo);
+    //
+    let forum_service = ForumService::new(&forum_repo);
     //
     cfg.app_data(web::Data::new(session_service))
         .app_data(captcha_service.clone())
         .app_data(web::Data::new(user_service))
-        .app_data(web::Data::new(topic_service));
+        .app_data(web::Data::new(topic_service))
+        .app_data(web::Data::new(forum_service));
 }

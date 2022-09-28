@@ -1,6 +1,6 @@
 use crate::{
     common::{CollectionName, DatabaseData},
-    models::Forum,
+    models::{Forum, ForumGroup},
 };
 use mongodb::{
     bson::doc,
@@ -26,12 +26,25 @@ impl ForumRepository {
         self.database_data.collection(CollectionName::Forums)
     }
 
+    fn group_collection(&self) -> Collection<ForumGroup> {
+        self.database_data.collection(CollectionName::ForumGroups)
+    }
+
     ///根据id查找论坛
     pub async fn find_by_id(&self, id: i64) -> mongodb::error::Result<Option<Forum>> {
         let filter = doc! {
             "_id": id,
         };
         let coll = self.collection();
+        coll.find_one(filter, None).await
+    }
+
+    ///根据id查找论坛分区
+    pub async fn find_group_by_id(&self, id: i64) -> mongodb::error::Result<Option<ForumGroup>> {
+        let filter = doc! {
+            "_id": id,
+        };
+        let coll = self.group_collection();
         coll.find_one(filter, None).await
     }
 
