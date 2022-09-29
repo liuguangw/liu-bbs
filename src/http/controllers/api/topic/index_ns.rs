@@ -6,7 +6,7 @@ use crate::{
             AuthorInfoNode, ForumInfoResponse, PaginationInfo, TopicListNode, TopicListResponse,
         },
     },
-    services::{ForumService, TopicService, UserInfoState, UserService},
+    services::{Provider, UserInfoState},
 };
 use actix_web::{get, web};
 
@@ -15,23 +15,28 @@ use actix_web::{get, web};
 pub async fn index(
     path: web::Path<i64>,
     req: ApiRequest<web::Query<FilterTopicListRequest>>,
-    forum_service: web::Data<ForumService>,
-    topic_service: web::Data<TopicService>,
-    user_service: web::Data<UserService>,
+    service_provider: web::Data<Provider>,
 ) -> ResponseResult<TopicListResponse> {
     //获取论坛信息
     let forum_id = path.into_inner();
-    let forum_info = forum_service.load_forum_info_by_id(forum_id).await?;
+    let forum_info = service_provider
+        .forum_service
+        .load_forum_info_by_id(forum_id)
+        .await?;
     let forum_group_id = forum_info.forum_group_id;
     //帖子总数量
-    let topic_count = topic_service.get_forum_topic_count(forum_id).await?;
+    let topic_count = service_provider
+        .topic_service
+        .get_forum_topic_count(forum_id)
+        .await?;
     let forum_info_response = {
         let mut info_response = ForumInfoResponse::from(forum_info);
         info_response.topic_count = topic_count as i64;
         info_response
     };
     //获取分区信息
-    let forum_group_info = forum_service
+    let forum_group_info = service_provider
+        .forum_service
         .load_forum_group_info_by_id(forum_group_id)
         .await?
         .into();
@@ -40,7 +45,8 @@ pub async fn index(
     let pagination_info = PaginationInfo::from_total_count(topic_count, req.per_page, req.page);
     //获取帖子列表
     let offset = pagination_info.offset();
-    let topic_list = topic_service
+    let topic_list = service_provider
+        .topic_service
         .get_forum_topic_list(
             forum_id,
             req.sort_type,
@@ -50,7 +56,7 @@ pub async fn index(
         .await?;
     //加入用户信息
     let mut topic_node_list = vec![];
-    let mut user_info_state = UserInfoState::new(&user_service);
+    let mut user_info_state = UserInfoState::new(&service_provider.user_service);
     for topic_info in topic_list {
         //作者信息
         let author_user_id = topic_info.author_user_id;

@@ -4,7 +4,7 @@ use crate::{
         requests::{LoginRequest, SessionRequest},
         responses::LoginResponse,
     },
-    services::{SessionService, UserService},
+    services::Provider,
 };
 use actix_web::{
     post,
@@ -16,19 +16,23 @@ use actix_web::{
 pub async fn login(
     req: ApiRequest<Json<LoginRequest>>,
     session_req: SessionRequest,
-    session_service: web::Data<SessionService>,
-    user_service: web::Data<UserService>,
+    service_provider: web::Data<Provider>,
 ) -> ResponseResult<LoginResponse> {
     let mut session = session_req.into_inner();
     //检测验证码
-    session_service
+    service_provider
+        .session_service
         .verify_captcha_code(&mut session, &req.captcha_code)
         .await?;
     //process login
-    let user = user_service
+    let user = service_provider
+        .user_service
         .process_login(&req.username, &req.password)
         .await?;
-    let session = session_service.create_new_session(Some(user.id)).await?;
+    let session = service_provider
+        .session_service
+        .create_new_session(Some(user.id))
+        .await?;
     let resp = LoginResponse::from(session);
     Ok(resp.into())
 }

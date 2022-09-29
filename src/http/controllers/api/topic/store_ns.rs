@@ -2,7 +2,7 @@ use crate::{
     common::{ApiRequest, ResponseResult},
     http::requests::{AuthSessionRequest, SaveTopicRequest},
     models::{Topic, TopicContent},
-    services::{ForumService, TopicService, UserService},
+    services::Provider,
 };
 use actix_web::{
     post,
@@ -15,16 +15,20 @@ pub async fn store(
     req: ApiRequest<Json<SaveTopicRequest>>,
     path: web::Path<i64>,
     session_req: AuthSessionRequest,
-    user_service: web::Data<UserService>,
-    forum_service: web::Data<ForumService>,
-    topic_service: web::Data<TopicService>,
+    service_provider: web::Data<Provider>,
 ) -> ResponseResult<Option<()>> {
     //判断用户是否存在
     let user_id = session_req.user_id;
-    user_service.load_user_info_by_id(user_id).await?;
+    service_provider
+        .user_service
+        .load_user_info_by_id(user_id)
+        .await?;
     //判断论坛是否存在
     let forum_id = path.into_inner();
-    forum_service.load_forum_info_by_id(forum_id).await?;
+    service_provider
+        .forum_service
+        .load_forum_info_by_id(forum_id)
+        .await?;
     //
     let req = req.0.into_inner();
     let mut topic_info = Topic {
@@ -41,7 +45,8 @@ pub async fn store(
         id: 0,
         content: req.content,
     };
-    topic_service
+    service_provider
+        .topic_service
         .process_post_topic(&mut topic_info, &mut topic_content)
         .await?;
     Ok(None.into())

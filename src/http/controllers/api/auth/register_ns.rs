@@ -5,7 +5,7 @@ use crate::{
         responses::LoginResponse,
     },
     models::User,
-    services::{SessionService, UserService},
+    services::Provider,
 };
 use actix_web::{
     dev::ConnectionInfo,
@@ -19,12 +19,12 @@ pub async fn register(
     req: ApiRequest<Json<RegisterRequest>>,
     session_req: SessionRequest,
     conn: ConnectionInfo,
-    session_service: web::Data<SessionService>,
-    user_service: web::Data<UserService>,
+    service_provider: web::Data<Provider>,
 ) -> ResponseResult<LoginResponse> {
     let mut session = session_req.into_inner();
     //检测验证码
-    session_service
+    service_provider
+        .session_service
         .verify_captcha_code(&mut session, &req.captcha_code)
         .await?;
     //初始化user
@@ -34,8 +34,14 @@ pub async fn register(
     user.set_password(&req.password);
     user.register_ip = conn.realip_remote_addr().unwrap().to_string();
     //process register
-    user_service.process_register(&mut user).await?;
-    let session = session_service.create_new_session(Some(user.id)).await?;
+    service_provider
+        .user_service
+        .process_register(&mut user)
+        .await?;
+    let session = service_provider
+        .session_service
+        .create_new_session(Some(user.id))
+        .await?;
     let resp = LoginResponse::from(session);
     Ok(resp.into())
 }

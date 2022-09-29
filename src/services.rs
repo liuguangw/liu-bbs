@@ -1,12 +1,14 @@
 mod captcha_service;
 mod forum_service;
 mod migrator_service;
+mod provider;
 mod session_service;
 mod topic_service;
 mod user_service;
 pub use captcha_service::CaptchaService;
 pub use forum_service::ForumService;
 pub use migrator_service::MigratorService;
+pub use provider::Provider;
 pub use session_service::SessionService;
 pub use topic_service::TopicService;
 pub use user_service::{UserInfoState, UserService};

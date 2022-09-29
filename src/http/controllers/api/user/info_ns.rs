@@ -1,7 +1,7 @@
 use crate::{
     common::ResponseResult,
     http::{requests::AuthSessionRequest, responses::UserInfoSelfResponse},
-    services::UserService,
+    services::Provider,
 };
 use actix_web::{get, web};
 
@@ -9,10 +9,13 @@ use actix_web::{get, web};
 #[get("/user/info")]
 pub async fn info(
     session_req: AuthSessionRequest,
-    user_service: web::Data<UserService>,
+    service_provider: web::Data<Provider>,
 ) -> ResponseResult<UserInfoSelfResponse> {
     let user_id = session_req.user_id;
-    let user_info = user_service.load_user_info_by_id(user_id).await?;
+    let user_info = service_provider
+        .user_service
+        .load_user_info_by_id(user_id)
+        .await?;
     let resp = UserInfoSelfResponse::from(user_info);
     Ok(resp.into())
 }
