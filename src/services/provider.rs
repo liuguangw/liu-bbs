@@ -2,8 +2,8 @@ use super::{CaptchaService, ForumService, SessionService, TopicService, UserServ
 use crate::{
     common::DatabaseData,
     data::{
-        CounterRepository, ForumRepository, SessionRepository, TopicContentRepository,
-        TopicRepository, UserRepository,
+        CounterRepository, ForumRepository, ForumTreeRepository, SessionRepository,
+        TopicContentRepository, TopicRepository, UserRepository,
     },
 };
 use std::sync::Arc;
@@ -34,12 +34,13 @@ impl Provider {
         let user_service = UserService::new(user_repo, &counter_repo);
         //
         let forum_repo = Arc::new(ForumRepository::new(database_data));
+        let forum_tree_repo = ForumTreeRepository::new(database_data);
         let topic_repo = TopicRepository::new(database_data);
         let topic_content_repo = TopicContentRepository::new(database_data);
         let topic_service =
             TopicService::new(&counter_repo, &forum_repo, topic_repo, topic_content_repo);
         //
-        let forum_service = ForumService::new(&forum_repo);
+        let forum_service = ForumService::new(&forum_repo, forum_tree_repo);
         //
         Self {
             captcha_service,

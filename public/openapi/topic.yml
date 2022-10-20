@@ -177,6 +177,11 @@ resources:
                   properties:
                     forum_info:
                       $ref: "#/components/ForumInfo"
+                    parent_forum_list:
+                      type: array
+                      description: 上级论坛列表
+                      items:
+                        $ref: ./components/schemas.yml#/CommonNodeResponse
                     forum_group_info:
                       $ref: ./components/schemas.yml#/CommonNodeResponse
                       description: 论坛分区信息
@@ -199,6 +204,13 @@ resources:
                     icon_url: ''
                     topic_count: 1
                     reply_count: 0
+                  parent_forum_list:
+                  - id: 2
+                    name: 默认论坛a
+                    description: 初次运行时,系统创建的论坛
+                  - id: 4
+                    name: 默认论坛b
+                    description: 初次运行时,系统创建的论坛
                   forum_group_info:
                     id: 1
                     name: 默认分区

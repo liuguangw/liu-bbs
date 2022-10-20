@@ -24,6 +24,7 @@ pub async fn index(
         .load_forum_info_by_id(forum_id)
         .await?;
     let forum_group_id = forum_info.forum_group_id;
+    let is_root_form = forum_info.is_root;
     //帖子总数量
     let topic_count = service_provider
         .topic_service
@@ -40,6 +41,15 @@ pub async fn index(
         .load_forum_group_info_by_id(forum_group_id)
         .await?
         .into();
+    //获取上级论坛列表
+    let parent_forum_list = if is_root_form {
+        Vec::new()
+    } else {
+        service_provider
+            .forum_service
+            .load_parent_forums(forum_id)
+            .await?
+    };
     //计算分页数据
     let req = req.0.into_inner();
     let pagination_info = PaginationInfo::from_total_count(topic_count, req.per_page, req.page);
@@ -92,6 +102,7 @@ pub async fn index(
     //response
     let topic_list_response = TopicListResponse {
         forum_info: forum_info_response,
+        parent_forum_list,
         forum_group_info,
         topic_list: topic_node_list,
         pagination_info,

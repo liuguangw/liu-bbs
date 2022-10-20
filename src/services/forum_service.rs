@@ -1,6 +1,7 @@
 use crate::{
     common::{ApiError, DatabaseError},
-    data::ForumRepository,
+    data::{ForumRepository, ForumTreeRepository},
+    http::responses::CommonNodeResponse,
     models::{Forum, ForumGroup},
 };
 use std::sync::Arc;
@@ -8,12 +9,14 @@ use std::sync::Arc;
 ///论坛相关服务
 pub struct ForumService {
     forum_repo: Arc<ForumRepository>,
+    forum_tree_repo: ForumTreeRepository,
 }
 impl ForumService {
     ///构造函数
-    pub fn new(forum_repo: &Arc<ForumRepository>) -> Self {
+    pub fn new(forum_repo: &Arc<ForumRepository>, forum_tree_repo: ForumTreeRepository) -> Self {
         Self {
             forum_repo: forum_repo.clone(),
+            forum_tree_repo,
         }
     }
     ///通过论坛id加载论坛信息
@@ -48,5 +51,28 @@ impl ForumService {
                 Err(ApiError::Common(message))
             }
         }
+    }
+
+    ///获取上级论坛列表
+    pub async fn load_parent_forums(
+        &self,
+        forum_id: i64,
+    ) -> Result<Vec<CommonNodeResponse>, ApiError> {
+        let parent_forum_trees = self
+            .forum_tree_repo
+            .load_parent_trees(forum_id)
+            .await
+            .map_err(DatabaseError::from)?;
+        let mut item_list = Vec::new();
+        for tree_node in parent_forum_trees {
+            let forum_info = self.load_forum_info_by_id(tree_node.forum_id).await?;
+            let forum_info_node = CommonNodeResponse {
+                id: forum_info.id,
+                name: forum_info.name,
+                description: forum_info.description,
+            };
+            item_list.push(forum_info_node);
+        }
+        Ok(item_list)
     }
 }

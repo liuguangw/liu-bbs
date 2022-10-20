@@ -73,6 +73,8 @@ pub struct PaginationInfo {
 pub struct TopicListResponse {
     ///论坛信息
     pub forum_info: ForumInfoResponse,
+    ///上级论坛列表
+    pub parent_forum_list: Vec<CommonNodeResponse>,
     ///论坛分区信息
     pub forum_group_info: CommonNodeResponse,
     ///分页信息

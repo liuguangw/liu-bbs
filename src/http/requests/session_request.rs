@@ -1,4 +1,4 @@
-use crate::{common::ApiError, models::Session, services::SessionService};
+use crate::{common::ApiError, models::Session, services::Provider};
 use actix_web::{web, FromRequest};
 use serde::Deserialize;
 use std::{future::Future, pin::Pin, time::SystemTime};
@@ -25,7 +25,7 @@ impl SessionRequest {
     }
     ///load_session
     async fn load_session_from_request(
-        session_service: web::Data<SessionService>,
+        service_provider: web::Data<Provider>,
         query_fut: <web::Query<SessionRequestParam> as FromRequest>::Future,
     ) -> Result<Self, ApiError> {
         //从query中获取SessionRequestParam
@@ -33,6 +33,7 @@ impl SessionRequest {
             Ok(t) if !t.session_id.is_empty() => Some(t.0),
             _ => None,
         };
+        let session_service = &service_provider.session_service;
         match request_params_opt {
             Some(params) => {
                 let session_id = params.session_id;
@@ -64,9 +65,9 @@ impl FromRequest for SessionRequest {
         req: &actix_web::HttpRequest,
         payload: &mut actix_web::dev::Payload,
     ) -> Self::Future {
-        let session_service = req.app_data::<web::Data<SessionService>>().unwrap().clone();
+        let service_provider = req.app_data::<web::Data<Provider>>().unwrap().clone();
         let query_fut = web::Query::<SessionRequestParam>::from_request(req, payload);
-        let fut = Self::load_session_from_request(session_service, query_fut);
+        let fut = Self::load_session_from_request(service_provider, query_fut);
         Box::pin(fut)
     }
 }
