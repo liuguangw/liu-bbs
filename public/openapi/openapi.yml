@@ -27,3 +27,5 @@ paths:
     $ref: ./user.yml#/paths/info
   /forums/{forum_id}/topics:
     $ref: ./topic.yml#/resources
+  /forum-topics/{topic_id}:
+    $ref: ./topic.yml#/info_resources

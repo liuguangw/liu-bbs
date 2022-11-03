@@ -1,4 +1,7 @@
-mod index_ns;
-mod store_ns;
-pub use index_ns::index;
-pub use store_ns::store;
+mod topic_index;
+mod topic_show;
+mod topic_store;
+
+pub use topic_index::index;
+pub use topic_show::show;
+pub use topic_store::store;

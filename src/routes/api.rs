@@ -10,6 +10,7 @@ pub fn load_routes(scope: Scope, cfg: &mut ServiceConfig) {
         .service(auth::login)
         .service(user::info)
         .service(topic::store)
-        .service(topic::index);
+        .service(topic::index)
+        .service(topic::show);
     cfg.service(scope);
 }

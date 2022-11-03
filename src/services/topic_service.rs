@@ -83,4 +83,23 @@ impl TopicService {
             .await
             .map_err(DatabaseError::from)
     }
+
+    ///通过帖子id加载帖子信息
+    pub async fn load_topic_info_by_id(&self, topic_id: i64) -> DatabaseResult<Option<Topic>> {
+        self.topic_repo
+            .find_by_id(topic_id)
+            .await
+            .map_err(DatabaseError::from)
+    }
+
+    ///通过帖子id加载帖子内容
+    pub async fn load_topic_content_by_id(
+        &self,
+        topic_id: i64,
+    ) -> DatabaseResult<Option<TopicContent>> {
+        self.topic_content_repo
+            .find_by_id(topic_id)
+            .await
+            .map_err(DatabaseError::from)
+    }
 }

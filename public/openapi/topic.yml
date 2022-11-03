@@ -114,6 +114,14 @@ parameters:
     schema:
       type: integer
     example: 1
+  topic_id:
+    name: topic_id
+    in: path
+    description: 帖子id
+    required: true
+    schema:
+      type: integer
+    example: 1
 resources:
   post:
     summary: 发表帖子
@@ -283,3 +291,35 @@ resources:
         $ref: ./components/responses.yml#/ErrorResponse
       "400":
         $ref: ./components/responses.yml#/ValidationErrorResponse
+info_resources:
+  get:
+    summary: 帖子详情
+    description: 获取帖子详情
+    tags:
+      - topic
+    parameters:
+      - $ref: "#/parameters/topic_id"
+    responses:
+      "200":
+        description: 帖子详情
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                code:
+                  $ref: ./components/schemas.yml#/ApiResponse/properties/code
+                data:
+                  type: object
+                  description: 帖子列表信息
+                  properties:
+                    meta_info:
+                      $ref: "#/components/TopicListNode"
+                      description: 帖子meta信息
+                    content:
+                      type: string
+                      description: 帖子内容
+                message:
+                  $ref: ./components/schemas.yml#/ApiResponse/properties/message
+      "500":
+        $ref: ./components/responses.yml#/ErrorResponse
