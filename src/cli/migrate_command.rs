@@ -1,6 +1,5 @@
-use super::app_command::AppCommand;
+use super::commands::Command;
 use crate::common::{AppConfig, DatabaseData, MigrationError};
-use crate::data::MigratorRepository;
 use crate::rt;
 use crate::services::MigratorService;
 use clap::Args;
@@ -10,23 +9,22 @@ use std::sync::Arc;
 #[derive(Args)]
 pub struct MigrateCommand {
     ///step limit
-    #[clap(short, long, value_parser, value_name = "STEP_LIMIT")]
+    #[arg(short, long, value_name = "STEP_LIMIT")]
     step: Option<u32>,
     ///rollback data
-    #[clap(long, value_parser)]
+    #[arg(long)]
     rollback: bool,
     ///Path of configuration file
-    #[clap(short = 'C', long = "conf", value_parser, default_value_t = String::from("./config.toml"), value_name = "FILE")]
+    #[arg(short = 'C', long = "conf", default_value_t = String::from("./config.toml"), value_name = "FILE")]
     config_file_path: String,
 }
 
 impl MigrateCommand {
-    async fn launch(&self) -> Result<(), Box<dyn std::error::Error>> {
+    async fn launch(&self) -> Result<(), MigrationError> {
         let app_config = AppConfig::load(&self.config_file_path).await?;
         let database_data = DatabaseData::connect(&app_config.database).await?;
         let database_data = Arc::new(database_data);
-        let migrator_repo = MigratorRepository::new(&database_data);
-        let migrator_service = MigratorService::new(migrator_repo);
+        let migrator_service = MigratorService::from(&database_data);
         if self.rollback {
             self.run_rollback(&migrator_service, self.step).await?;
         } else {
@@ -63,10 +61,11 @@ impl MigrateCommand {
         Ok(())
     }
 }
-impl AppCommand for MigrateCommand {
+
+impl Command for MigrateCommand {
     fn execute(&self) {
         if let Err(err) = rt::block_on(self.launch()) {
-            panic!("{}", err);
+            panic!("{err}");
         }
     }
 }

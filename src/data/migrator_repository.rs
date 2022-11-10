@@ -16,13 +16,15 @@ pub struct MigratorRepository {
     database_data: Arc<DatabaseData>,
 }
 
-impl MigratorRepository {
-    ///构造函数
-    pub fn new(database_data: &Arc<DatabaseData>) -> Self {
+impl From<&Arc<DatabaseData>> for MigratorRepository {
+    fn from(database_data: &Arc<DatabaseData>) -> Self {
         Self {
             database_data: database_data.clone(),
         }
     }
+}
+
+impl MigratorRepository {
     ///获取迁移记录集合对象
     fn migration_log_collection(&self) -> Collection<MigrationLog> {
         self.database_data.collection(CollectionName::Migrations)

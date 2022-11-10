@@ -1,20 +1,25 @@
-use super::app_command::AppCommand;
 use super::hello_command::HelloCommand;
 use super::migrate_command::MigrateCommand;
 use super::server_command::ServerCommand;
 use clap::Subcommand;
 
+///command定义
+pub trait Command {
+    ///执行command
+    fn execute(&self);
+}
+
 #[derive(Subcommand)]
 pub enum Commands {
-    #[clap(name = "hello", about = "hello world command")]
+    #[command(name = "hello", about = "hello world command")]
     Hello(HelloCommand),
-    #[clap(name = "serve", about = "run api server")]
+    #[command(name = "serve", about = "run api server")]
     Serve(ServerCommand),
-    #[clap(name = "migrate", about = "data migration")]
+    #[command(name = "migrate", about = "data migration")]
     Migrate(MigrateCommand),
 }
 
-impl AppCommand for Commands {
+impl Command for Commands {
     fn execute(&self) {
         match self {
             Commands::Hello(s) => s.execute(),

@@ -7,11 +7,15 @@ pub struct MigratorService {
     migrator_repo: MigratorRepository,
 }
 
-impl MigratorService {
-    ///构造函数
-    pub fn new(migrator_repo: MigratorRepository) -> Self {
-        Self { migrator_repo }
+impl<T: Into<MigratorRepository>> From<T> for MigratorService {
+    fn from(item: T) -> Self {
+        Self {
+            migrator_repo: item.into(),
+        }
     }
+}
+
+impl MigratorService {
     ///执行数据迁移
     ///
     /// 返回成功迁移的条数

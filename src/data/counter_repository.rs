@@ -14,14 +14,15 @@ pub struct CounterRepository {
     database_data: Arc<DatabaseData>,
 }
 
-impl CounterRepository {
-    ///构造函数
-    pub fn new(database_data: &Arc<DatabaseData>) -> Self {
+impl From<&Arc<DatabaseData>> for CounterRepository {
+    fn from(database_data: &Arc<DatabaseData>) -> Self {
         Self {
             database_data: database_data.clone(),
         }
     }
+}
 
+impl CounterRepository {
     fn collection(&self) -> Collection<Counter> {
         self.database_data.collection(CollectionName::Counters)
     }

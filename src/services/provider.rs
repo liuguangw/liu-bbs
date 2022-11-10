@@ -1,11 +1,5 @@
 use super::{CaptchaService, ForumService, SessionService, TopicService, UserService};
-use crate::{
-    common::DatabaseData,
-    data::{
-        CounterRepository, ForumRepository, ForumTreeRepository, SessionRepository,
-        TopicContentRepository, TopicRepository, UserRepository,
-    },
-};
+use crate::{common::DatabaseData, data::Provider as DataProvider};
 use std::sync::Arc;
 
 ///service provider
@@ -24,30 +18,14 @@ pub struct Provider {
 impl Provider {
     ///构造函数
     pub fn new(database_data: &Arc<DatabaseData>) -> Self {
-        let captcha_service = CaptchaService::default();
-        //
-        let session_repo = SessionRepository::new(database_data);
-        let session_service = SessionService::new(session_repo);
-        //
-        let counter_repo = Arc::new(CounterRepository::new(database_data));
-        let user_repo = UserRepository::new(database_data);
-        let user_service = UserService::new(user_repo, &counter_repo);
-        //
-        let forum_repo = Arc::new(ForumRepository::new(database_data));
-        let forum_tree_repo = ForumTreeRepository::new(database_data);
-        let topic_repo = TopicRepository::new(database_data);
-        let topic_content_repo = TopicContentRepository::new(database_data);
-        let topic_service =
-            TopicService::new(&counter_repo, &forum_repo, topic_repo, topic_content_repo);
-        //
-        let forum_service = ForumService::new(&forum_repo, forum_tree_repo);
+        let data_provider = Arc::new(DataProvider::from(database_data));
         //
         Self {
-            captcha_service,
-            session_service,
-            user_service,
-            topic_service,
-            forum_service,
+            captcha_service: CaptchaService::default(),
+            session_service: (&data_provider).into(),
+            user_service: (&data_provider).into(),
+            topic_service: (&data_provider).into(),
+            forum_service: (&data_provider).into(),
         }
     }
 }

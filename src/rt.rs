@@ -2,7 +2,7 @@ use std::future::Future;
 use tokio::runtime::Runtime;
 
 /// 构造异步运行时
-pub fn runtime() -> Runtime {
+fn runtime() -> Runtime {
     tokio::runtime::Builder::new_multi_thread()
         .thread_name("tokio_main_rt")
         .enable_all()

@@ -2,7 +2,6 @@ use actix_web::{test, web, App};
 use liu_bbs::{
     cli::app_factory,
     common::{AppConfig, DatabaseData, MigrationError},
-    data::MigratorRepository,
     services::{MigratorService, Provider},
 };
 use std::sync::Arc;
@@ -33,7 +32,6 @@ async fn test_main() {
 }
 
 async fn do_migrate(database_data: &Arc<DatabaseData>) -> Result<u32, MigrationError> {
-    let migrator_repo = MigratorRepository::new(database_data);
-    let migrator_service = MigratorService::new(migrator_repo);
+    let migrator_service = MigratorService::from(database_data);
     migrator_service.run_migrate(None).await
 }

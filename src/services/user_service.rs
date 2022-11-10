@@ -1,6 +1,6 @@
 use crate::{
     common::{ApiError, CounterKey, DatabaseError, DatabaseResult},
-    data::{CounterRepository, UserRepository},
+    data::{CounterRepository, Provider as DataProvider, UserRepository},
     models::User,
 };
 use std::{
@@ -10,24 +10,32 @@ use std::{
 
 ///用户相关服务
 pub struct UserService {
-    user_repo: UserRepository,
-    counter_repo: Arc<CounterRepository>,
+    data_provider: Arc<DataProvider>,
+}
+
+impl From<&Arc<DataProvider>> for UserService {
+    fn from(item: &Arc<DataProvider>) -> Self {
+        Self {
+            data_provider: item.clone(),
+        }
+    }
 }
 
 impl UserService {
-    ///构造函数
-    pub fn new(user_repo: UserRepository, counter_repo: &Arc<CounterRepository>) -> Self {
-        Self {
-            user_repo,
-            counter_repo: counter_repo.clone(),
-        }
+    #[inline]
+    fn user_repo(&self) -> &UserRepository {
+        &self.data_provider.user_repo
+    }
+    #[inline]
+    fn counter_repo(&self) -> &CounterRepository {
+        &self.data_provider.counter_repo
     }
 
     ///处理用户注册
     pub async fn process_register(&self, user: &mut User) -> Result<(), ApiError> {
         //判断用户名是否已经存在
         let user_tmp = self
-            .user_repo
+            .user_repo()
             .find_by_username(&user.username)
             .await
             .map_err(DatabaseError::from)?;
@@ -37,7 +45,7 @@ impl UserService {
         }
         //判断昵称是否已经存在
         let user_tmp = self
-            .user_repo
+            .user_repo()
             .find_by_nickname(&user.nickname)
             .await
             .map_err(DatabaseError::from)?;
@@ -47,13 +55,13 @@ impl UserService {
         }
         //计算用户id
         let user_id = self
-            .counter_repo
+            .counter_repo()
             .increment(CounterKey::LastUserId)
             .await
             .map_err(DatabaseError::from)?;
         user.id = user_id;
         //insert
-        self.user_repo
+        self.user_repo()
             .insert_user(user)
             .await
             .map_err(DatabaseError::from)?;
@@ -64,7 +72,7 @@ impl UserService {
     pub async fn process_login(&self, username: &str, password: &str) -> Result<User, ApiError> {
         //判断用户名是否已经存在
         let user = match self
-            .user_repo
+            .user_repo()
             .find_by_username(username)
             .await
             .map_err(DatabaseError::from)?
@@ -85,7 +93,7 @@ impl UserService {
 
     ///通过用户id加载用户信息
     pub async fn load_option_user_info_by_id(&self, user_id: i64) -> DatabaseResult<Option<User>> {
-        self.user_repo
+        self.user_repo()
             .find_by_id(user_id)
             .await
             .map_err(|e| e.into())

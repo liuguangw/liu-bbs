@@ -1,23 +1,32 @@
+use std::sync::Arc;
+
 use crate::{
     common::{ApiError, DatabaseResult},
-    data::SessionRepository,
+    data::{Provider as DataProvider, SessionRepository},
     models::Session,
 };
 use uuid::Uuid;
 ///会话服务
 pub struct SessionService {
-    session_repo: SessionRepository,
+    data_provider: Arc<DataProvider>,
+}
+
+impl From<&Arc<DataProvider>> for SessionService {
+    fn from(item: &Arc<DataProvider>) -> Self {
+        Self {
+            data_provider: item.clone(),
+        }
+    }
 }
 
 impl SessionService {
-    ///构造函数
-    pub fn new(session_repo: SessionRepository) -> Self {
-        Self { session_repo }
+    #[inline]
+    fn session_repo(&self) -> &SessionRepository {
+        &self.data_provider.session_repo
     }
-
     ///加载会话数据
     pub async fn load_session(&self, session_id: &str) -> DatabaseResult<Option<Session>> {
-        self.session_repo
+        self.session_repo()
             .find_by_id(session_id)
             .await
             .map_err(|e| e.into())
@@ -36,13 +45,13 @@ impl SessionService {
             None => Default::default(),
         };
         session.id = Self::generate_random_id();
-        self.session_repo.insert_session(&session).await?;
+        self.session_repo().insert_session(&session).await?;
         Ok(session)
     }
 
     ///更新会话数据
     pub async fn update_session(&self, session: &Session) -> DatabaseResult<()> {
-        self.session_repo.update_session(session).await?;
+        self.session_repo().update_session(session).await?;
         Ok(())
     }
 

@@ -1,6 +1,6 @@
 use crate::{
     common::{ApiError, DatabaseError},
-    data::{ForumRepository, ForumTreeRepository},
+    data::{ForumRepository, ForumTreeRepository, Provider as DataProvider},
     http::responses::CommonNodeResponse,
     models::{Forum, ForumGroup},
 };
@@ -8,21 +8,31 @@ use std::sync::Arc;
 
 ///论坛相关服务
 pub struct ForumService {
-    forum_repo: Arc<ForumRepository>,
-    forum_tree_repo: ForumTreeRepository,
+    data_provider: Arc<DataProvider>,
 }
-impl ForumService {
-    ///构造函数
-    pub fn new(forum_repo: &Arc<ForumRepository>, forum_tree_repo: ForumTreeRepository) -> Self {
+
+impl From<&Arc<DataProvider>> for ForumService {
+    fn from(item: &Arc<DataProvider>) -> Self {
         Self {
-            forum_repo: forum_repo.clone(),
-            forum_tree_repo,
+            data_provider: item.clone(),
         }
+    }
+}
+
+impl ForumService {
+    #[inline]
+    fn forum_repo(&self) -> &ForumRepository {
+        &self.data_provider.forum_repo
+    }
+
+    #[inline]
+    fn forum_tree_repo(&self) -> &ForumTreeRepository {
+        &self.data_provider.forum_tree_repo
     }
     ///通过论坛id加载论坛信息
     pub async fn load_forum_info_by_id(&self, forum_id: i64) -> Result<Forum, ApiError> {
         let option_forum_info = self
-            .forum_repo
+            .forum_repo()
             .find_by_id(forum_id)
             .await
             .map_err(DatabaseError::from)?;
@@ -40,7 +50,7 @@ impl ForumService {
         forum_group_id: i64,
     ) -> Result<ForumGroup, ApiError> {
         let option_forum_group_info = self
-            .forum_repo
+            .forum_repo()
             .find_group_by_id(forum_group_id)
             .await
             .map_err(DatabaseError::from)?;
@@ -59,7 +69,7 @@ impl ForumService {
         forum_id: i64,
     ) -> Result<Vec<CommonNodeResponse>, ApiError> {
         let parent_forum_trees = self
-            .forum_tree_repo
+            .forum_tree_repo()
             .load_parent_trees(forum_id)
             .await
             .map_err(DatabaseError::from)?;

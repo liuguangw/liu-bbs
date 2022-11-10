@@ -1,6 +1,5 @@
-use super::app_command::AppCommand;
+use super::commands::Command;
 use crate::common::{AppConfig, DatabaseData, LaunchError, MigrationError};
-use crate::data::MigratorRepository;
 use crate::routes;
 use crate::services::{MigratorService, Provider};
 use actix_web::dev::{ServiceFactory, ServiceRequest};
@@ -12,20 +11,19 @@ use std::sync::Arc;
 #[derive(Args)]
 pub struct ServerCommand {
     ///IP address
-    #[clap(short = 'H', long, value_parser)]
+    #[arg(short = 'H', long)]
     host: Option<String>,
     ///listen port
-    #[clap(short = 'P', long, value_parser)]
+    #[arg(short = 'P', long)]
     port: Option<u16>,
     ///Path of configuration file
-    #[clap(short = 'C', long = "conf", value_parser, default_value_t = String::from("./config.toml"), value_name = "FILE")]
+    #[arg(short = 'C', long = "conf", default_value_t = String::from("./config.toml"), value_name = "FILE")]
     config_file_path: String,
 }
 
 impl ServerCommand {
     async fn do_migrate(&self, database_data: &Arc<DatabaseData>) -> Result<(), MigrationError> {
-        let migrator_repo = MigratorRepository::new(database_data);
-        let migrator_service = MigratorService::new(migrator_repo);
+        let migrator_service = MigratorService::from(database_data);
         let migrate_count = migrator_service.run_migrate(None).await?;
         if migrate_count > 0 {
             println!("Migrate count: {}", migrate_count);
@@ -57,12 +55,12 @@ impl ServerCommand {
     }
 }
 
-impl AppCommand for ServerCommand {
+impl Command for ServerCommand {
     /// 运行 http 服务
     fn execute(&self) {
         //println!("host={} port={}", &self.host, self.port);
         if let Err(err) = rt::System::new().block_on(self.launch()) {
-            panic!("{}", err)
+            panic!("{err}")
         }
     }
 }

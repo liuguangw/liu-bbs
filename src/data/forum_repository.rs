@@ -14,14 +14,15 @@ pub struct ForumRepository {
     database_data: Arc<DatabaseData>,
 }
 
-impl ForumRepository {
-    ///构造函数
-    pub fn new(database_data: &Arc<DatabaseData>) -> Self {
+impl From<&Arc<DatabaseData>> for ForumRepository {
+    fn from(database_data: &Arc<DatabaseData>) -> Self {
         Self {
             database_data: database_data.clone(),
         }
     }
+}
 
+impl ForumRepository {
     fn collection(&self) -> Collection<Forum> {
         self.database_data.collection(CollectionName::Forums)
     }

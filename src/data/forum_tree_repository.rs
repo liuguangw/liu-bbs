@@ -13,14 +13,15 @@ pub struct ForumTreeRepository {
     database_data: Arc<DatabaseData>,
 }
 
-impl ForumTreeRepository {
-    ///构造函数
-    pub fn new(database_data: &Arc<DatabaseData>) -> Self {
+impl From<&Arc<DatabaseData>> for ForumTreeRepository {
+    fn from(database_data: &Arc<DatabaseData>) -> Self {
         Self {
             database_data: database_data.clone(),
         }
     }
+}
 
+impl ForumTreeRepository {
     fn collection(&self) -> Collection<ForumTree> {
         self.database_data.collection(CollectionName::ForumTrees)
     }

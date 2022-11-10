@@ -13,13 +13,15 @@ pub struct SessionRepository {
     database_data: Arc<DatabaseData>,
 }
 
-impl SessionRepository {
-    ///构造函数
-    pub fn new(database_data: &Arc<DatabaseData>) -> Self {
+impl From<&Arc<DatabaseData>> for SessionRepository {
+    fn from(database_data: &Arc<DatabaseData>) -> Self {
         Self {
             database_data: database_data.clone(),
         }
     }
+}
+
+impl SessionRepository {
     fn collection(&self) -> Collection<Session> {
         self.database_data.collection(CollectionName::Sessions)
     }
