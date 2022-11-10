@@ -1,6 +1,6 @@
 use super::ApiError;
 use actix_web::{web, FromRequest};
-use futures::ready;
+use futures_util::ready;
 use std::{
     future::Future,
     ops::Deref,

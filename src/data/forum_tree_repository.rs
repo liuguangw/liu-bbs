@@ -1,6 +1,6 @@
 use std::sync::Arc;
 
-use futures::TryStreamExt;
+use futures_util::TryStreamExt;
 use mongodb::{bson::doc, options::FindOptions, Collection};
 
 use crate::{

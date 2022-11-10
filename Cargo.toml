@@ -9,22 +9,25 @@ edition = "2021"
 os_info = { version = "3", default-features = false }
 
 [dependencies]
-clap = { version = "4.0.22", features = ["derive", "color"] }
+clap = { version = "4.0.22", features = ["derive"] }
 actix-web = { version = "4", default-features = false, features = ["macros"] }
 actix-files = { version = "0.6.2", optional = true }
 serde = { version = "1.0", default-features = false, features = ["derive"] }
 os_info = { version = "3", default-features = false }
-futures = { version = "0.3", default-features = false }
+futures-util = { version = "0.3", default-features = false, features = ["std"] }
 rand = "0.8"
-sha1 = "0.10.4"
+sha1 = "0.10.5"
 uuid = { version = "1.1.2", features = ["v4", "fast-rng"] }
 toml = "0.5"
-mongodb = "2.3.0"
+mongodb = "2.3.1"
 thiserror = "1.0"
 async-trait = "0.1"
 captcha-a = "0.1.6"
 regex = "1.6"
-chrono = "0.4"
+chrono = { version = "0.4", default-features = false, features = [
+    "std",
+    "clock",
+] }
 
 [dependencies.tokio]
 version = "1.20.1"

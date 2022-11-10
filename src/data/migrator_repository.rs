@@ -5,7 +5,7 @@ use crate::migrations::{
     CreateTopicContentsCollection, CreateTopicRepliesCollection, CreateTopicsCollection,
     CreateUserEmailsCollection, CreateUsersCollection,
 };
-use futures::stream::TryStreamExt;
+use futures_util::stream::TryStreamExt;
 use mongodb::bson::doc;
 use mongodb::options::FindOptions;
 use mongodb::Collection;

@@ -2,7 +2,7 @@ use crate::{
     common::{CollectionName, DatabaseData},
     models::Topic,
 };
-use futures::TryStreamExt;
+use futures_util::TryStreamExt;
 use mongodb::{bson::doc, options::FindOptions, Collection};
 use std::sync::Arc;
 
